@@ -4,24 +4,37 @@
   "name_for_human": "Terprint AI",
   "description_for_human": "Cannabis strain intelligence - get strain info, recommendations, deals, and dispensary locations",
   "namespace": "terprint",
-  "description_for_model": "Use this plugin to help users with cannabis strain information, recommendations, deals, and dispensary locations in Florida. The plugin connects to Terprint's comprehensive medical marijuana database.\n\nUse queryChat for: questions about specific strains, terpenes, cannabinoids, effects, medical benefits\nUse getRecommendations for: when users want strain suggestions based on preferences, symptoms, or desired effects\nUse searchDeals for: finding prices, promotions, discounts on cannabis products\nUse searchLocations for: finding dispensaries by city, zip code, or brand name",
+  "description_for_model": "Use this plugin to help users with cannabis strain information, recommendations, deals, and dispensary locations in Florida. The plugin connects to Terprint's comprehensive medical marijuana database.\n\nUse searchStrains for: searching and looking up cannabis strains by name\nUse getStrainDetails for: getting detailed information about a specific strain\nUse getRecommendations for: when users want strain suggestions based on preferences or effects\nUse searchDeals for: finding prices, promotions, discounts on cannabis products\nUse searchLocations for: finding dispensaries by city, zip code, or brand name",
   "functions": [
     {
-      "name": "queryChat",
-      "description": "Ask natural language questions about cannabis strains, terpenes, cannabinoids, effects, and medical benefits. Returns detailed information from Terprint's strain database.",
+      "name": "searchStrains",
+      "description": "Search for cannabis strains by name. Returns strain names, types (Flower, Vape, Concentrate, etc.), and basic information.",
       "parameters": {
         "type": "object",
-        "required": ["query"],
         "properties": {
-          "query": {
+          "search": {
             "type": "string",
-            "description": "The user's question about cannabis strains, terpenes, or effects"
+            "description": "Search term to filter strains by name (e.g., Blue Dream, OG Kush)"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of results to return (default 10)"
           }
         }
-      },
-      "returns": {
+      }
+    },
+    {
+      "name": "getStrainDetails",
+      "description": "Get detailed information about a specific cannabis strain including type, genetics, terpene profile, and cannabinoid content.",
+      "parameters": {
         "type": "object",
-        "description": "Response containing answer text and related strain information"
+        "required": ["strainId"],
+        "properties": {
+          "strainId": {
+            "type": "string",
+            "description": "The strain ID or slug name to look up"
+          }
+        }
       }
     },
     {
@@ -29,37 +42,20 @@
       "description": "Get personalized cannabis strain recommendations based on desired effects, symptoms, or flavor preferences. Returns multiple strains with match scores and reasoning.",
       "parameters": {
         "type": "object",
-        "required": ["preferences"],
         "properties": {
-          "preferences": {
-            "type": "object",
-            "properties": {
-              "effects": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Desired effects like relaxation, energy, creativity, pain relief, sleep"
-              },
-              "flavors": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Preferred flavor profiles like citrus, earthy, sweet, pine"
-              },
-              "avoidEffects": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Effects to avoid like anxiety, paranoia, dry mouth"
-              }
-            }
+          "effects": {
+            "type": "string",
+            "description": "Comma-separated desired effects like relaxation, energy, creativity, pain relief, sleep"
+          },
+          "flavors": {
+            "type": "string",
+            "description": "Comma-separated preferred flavor profiles like citrus, earthy, sweet, pine"
           },
           "limit": {
             "type": "integer",
             "description": "Number of recommendations to return (default 5)"
           }
         }
-      },
-      "returns": {
-        "type": "object",
-        "description": "List of recommended strains with match scores and reasoning"
       }
     },
     {
@@ -85,10 +81,6 @@
             "description": "Product category: flower, concentrate, edible, vape, topical"
           }
         }
-      },
-      "returns": {
-        "type": "object",
-        "description": "List of deals with product, dispensary, prices, and discounts"
       }
     },
     {
@@ -110,10 +102,6 @@
             "description": "ZIP code to search near"
           }
         }
-      },
-      "returns": {
-        "type": "object",
-        "description": "List of dispensary locations with addresses and contact info"
       }
     }
   ],
@@ -127,7 +115,7 @@
       "spec": {
         "url": "apiSpecificationFile/openapi.json"
       },
-      "run_for_functions": ["queryChat", "getRecommendations", "searchDeals", "searchLocations"]
+      "run_for_functions": ["searchStrains", "getStrainDetails", "getRecommendations", "searchDeals", "searchLocations"]
     }
   ]
 }

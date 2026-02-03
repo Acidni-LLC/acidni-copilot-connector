@@ -12,28 +12,25 @@
     }
   ],
   "paths": {
-    "/chat/query": {
-      "post": {
-        "operationId": "queryChat",
-        "summary": "Ask questions about cannabis strains",
-        "description": "Use this to answer natural language questions about cannabis strains, terpenes, cannabinoids, effects, and medical benefits.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["query"],
-                "properties": {
-                  "query": {
-                    "type": "string",
-                    "description": "The user's question about cannabis strains"
-                  }
-                }
-              }
-            }
+    "/data/strains": {
+      "get": {
+        "operationId": "searchStrains",
+        "summary": "Search cannabis strains",
+        "description": "Search and retrieve information about cannabis strains including type, genetics, and profiles. Use this to answer questions about specific strains or search for strains.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search term to filter strains by name"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 },
+            "description": "Number of results to return"
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -42,24 +39,64 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "answer": {
-                      "type": "string"
-                    },
-                    "strains": {
+                    "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": { "type": "string" },
                           "name": { "type": "string" },
-                          "type": { "type": "string" },
-                          "thcRange": { "type": "string" },
-                          "effects": {
-                            "type": "array",
-                            "items": { "type": "string" }
-                          }
+                          "strain_type": { "type": "string" },
+                          "genetics": { "type": "string" },
+                          "terpene_profile": { "type": "object" },
+                          "cannabinoid_profile": { "type": "object" }
                         }
                       }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": { "type": "integer" },
+                        "limit": { "type": "integer" },
+                        "offset": { "type": "integer" }
+                      }
                     }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/strains/{strainId}": {
+      "get": {
+        "operationId": "getStrainDetails",
+        "summary": "Get strain details",
+        "description": "Get detailed information about a specific cannabis strain by ID or slug name.",
+        "parameters": [
+          {
+            "name": "strainId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Strain ID or slug name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Strain details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "strain_type": { "type": "string" },
+                    "genetics": { "type": "string" },
+                    "terpene_profile": { "type": "object" },
+                    "cannabinoid_profile": { "type": "object" }
                   }
                 }
               }
