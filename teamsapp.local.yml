@@ -1,0 +1,25 @@
+# Teams Toolkit Local Development Configuration
+
+version: v1.7
+
+provision:
+  - uses: teamsApp/create
+    with:
+      name: Terprint AI-local
+    writeToEnvironmentFile:
+      teamsAppId: TEAMS_APP_ID
+
+deploy:
+  - uses: teamsApp/zipAppPackage
+    with:
+      manifestPath: ./appPackage/manifest.json
+      outputZipPath: ./appPackage/build/appPackage.local.zip
+      outputFolder: ./appPackage/build
+
+  - uses: teamsApp/validateAppPackage
+    with:
+      appPackagePath: ./appPackage/build/appPackage.local.zip
+
+  - uses: teamsApp/update
+    with:
+      appPackagePath: ./appPackage/build/appPackage.local.zip

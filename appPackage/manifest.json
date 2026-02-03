@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Acidni LLC",
+    "websiteUrl": "https://www.acidni.com",
+    "privacyUrl": "https://www.acidni.com/privacy",
+    "termsOfUseUrl": "https://www.acidni.com/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Terprint AI",
+    "full": "Terprint AI - Cannabis Strain Intelligence"
+  },
+  "description": {
+    "short": "Cannabis strain intelligence powered by Terprint",
+    "full": "Get instant answers about cannabis strains, personalized recommendations, deals, and dispensary locations. Powered by Terprint's comprehensive Florida medical marijuana database."
+  },
+  "accentColor": "#10B981",
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "terprintAgent",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  },
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "apim-terprint-dev.azure-api.net",
+    "terprint.acidni.net"
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
+  "schema_version": "v2.2",
+  "name_for_human": "Terprint AI",
+  "description_for_human": "Cannabis strain intelligence - get strain info, recommendations, deals, and dispensary locations",
+  "namespace": "terprint",
+  "description_for_model": "Use this plugin to help users with cannabis strain information, recommendations, deals, and dispensary locations in Florida. The plugin connects to Terprint's comprehensive medical marijuana database.\n\nUse queryChat for: questions about specific strains, terpenes, cannabinoids, effects, medical benefits\nUse getRecommendations for: when users want strain suggestions based on preferences, symptoms, or desired effects\nUse searchDeals for: finding prices, promotions, discounts on cannabis products\nUse searchLocations for: finding dispensaries by city, zip code, or brand name",
+  "functions": [
+    {
+      "name": "queryChat",
+      "description": "Ask natural language questions about cannabis strains, terpenes, cannabinoids, effects, and medical benefits. Returns detailed information from Terprint's strain database.",
+      "parameters": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The user's question about cannabis strains, terpenes, or effects"
+          }
+        }
+      },
+      "returns": {
+        "type": "object",
+        "description": "Response containing answer text and related strain information"
+      }
+    },
+    {
+      "name": "getRecommendations",
+      "description": "Get personalized cannabis strain recommendations based on desired effects, symptoms, or flavor preferences. Returns multiple strains with match scores and reasoning.",
+      "parameters": {
+        "type": "object",
+        "required": ["preferences"],
+        "properties": {
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "effects": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Desired effects like relaxation, energy, creativity, pain relief, sleep"
+              },
+              "flavors": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Preferred flavor profiles like citrus, earthy, sweet, pine"
+              },
+              "avoidEffects": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Effects to avoid like anxiety, paranoia, dry mouth"
+              }
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of recommendations to return (default 5)"
+          }
+        }
+      },
+      "returns": {
+        "type": "object",
+        "description": "List of recommended strains with match scores and reasoning"
+      }
+    },
+    {
+      "name": "searchDeals",
+      "description": "Search for current deals, discounts, and promotions on cannabis products at Florida dispensaries.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "strain": {
+            "type": "string",
+            "description": "Strain name to search for deals"
+          },
+          "dispensary": {
+            "type": "string",
+            "description": "Dispensary name to filter results (Trulieve, MUV, Curaleaf, Cookies, Flowery)"
+          },
+          "maxPrice": {
+            "type": "number",
+            "description": "Maximum price filter"
+          },
+          "category": {
+            "type": "string",
+            "description": "Product category: flower, concentrate, edible, vape, topical"
+          }
+        }
+      },
+      "returns": {
+        "type": "object",
+        "description": "List of deals with product, dispensary, prices, and discounts"
+      }
+    },
+    {
+      "name": "searchLocations",
+      "description": "Find medical marijuana dispensaries in Florida by city, zip code, or dispensary brand name.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "City name to search (Orlando, Tampa, Miami, Jacksonville, etc.)"
+          },
+          "dispensary": {
+            "type": "string",
+            "description": "Dispensary brand name (Trulieve, MUV, Curaleaf, Cookies, Flowery)"
+          },
+          "zip": {
+            "type": "string",
+            "description": "ZIP code to search near"
+          }
+        }
+      },
+      "returns": {
+        "type": "object",
+        "description": "List of dispensary locations with addresses and contact info"
+      }
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "OpenApi",
+      "auth": {
+        "type": "ApiKeyPluginVault",
+        "reference_id": "${{APIM_SUBSCRIPTION_KEY_REFERENCE}}"
+      },
+      "spec": {
+        "url": "apiSpecificationFile/openapi.json"
+      },
+      "run_for_functions": ["queryChat", "getRecommendations", "searchDeals", "searchLocations"]
+    }
+  ]
+}

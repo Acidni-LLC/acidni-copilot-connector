@@ -1,0 +1,263 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Terprint AI Copilot Plugin API",
+    "description": "API plugin for Microsoft 365 Copilot integration with Terprint cannabis analytics services",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://apim-terprint-dev.azure-api.net",
+      "description": "Terprint API Gateway"
+    }
+  ],
+  "paths": {
+    "/chat/query": {
+      "post": {
+        "operationId": "queryChat",
+        "summary": "Ask questions about cannabis strains",
+        "description": "Use this to answer natural language questions about cannabis strains, terpenes, cannabinoids, effects, and medical benefits.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The user's question about cannabis strains"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "answer": {
+                      "type": "string"
+                    },
+                    "strains": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "type": { "type": "string" },
+                          "thcRange": { "type": "string" },
+                          "effects": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recommend/strains": {
+      "post": {
+        "operationId": "getRecommendations",
+        "summary": "Get personalized strain recommendations",
+        "description": "Returns personalized cannabis strain recommendations based on user preferences or symptoms.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "effects": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Desired effects like relaxation, energy"
+                  },
+                  "flavors": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Preferred flavor profiles"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "default": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recommendations returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recommendations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "matchScore": { "type": "number" },
+                          "reasoning": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deals/search": {
+      "get": {
+        "operationId": "searchDeals",
+        "summary": "Find cannabis deals and promotions",
+        "description": "Search for current deals at Florida dispensaries.",
+        "parameters": [
+          {
+            "name": "strain",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Strain name to search"
+          },
+          {
+            "name": "dispensary",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Dispensary name filter"
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "schema": { "type": "number" },
+            "description": "Maximum price"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { 
+              "type": "string",
+              "enum": ["flower", "concentrate", "edible", "vape", "topical"]
+            },
+            "description": "Product category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deals found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productName": { "type": "string" },
+                          "dispensary": { "type": "string" },
+                          "originalPrice": { "type": "number" },
+                          "salePrice": { "type": "number" },
+                          "discount": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/api/locations/search": {
+      "get": {
+        "operationId": "searchLocations",
+        "summary": "Find dispensary locations",
+        "description": "Search for medical marijuana dispensaries in Florida.",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "City name"
+          },
+          {
+            "name": "dispensary",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Dispensary brand"
+          },
+          {
+            "name": "zip",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "ZIP code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Locations found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "locations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "dispensary": { "type": "string" },
+                          "address": { "type": "string" },
+                          "city": { "type": "string" },
+                          "state": { "type": "string" },
+                          "zip": { "type": "string" },
+                          "phone": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "name": "Ocp-Apim-Subscription-Key",
+        "in": "header"
+      }
+    }
+  }
+}
