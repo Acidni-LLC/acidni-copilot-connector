@@ -1,11 +1,11 @@
-{
+﻿{
   "name": "acidni-copilot-connector",
   "version": "1.0.0",
   "description": "Microsoft 365 Copilot plugin for Terprint AI cannabis analytics services",
   "main": "index.js",
   "scripts": {
-    "validate": "npx @microsoft/teams-toolkit-cli validate -m ./appPackage/manifest.json",
-    "package": "npx @microsoft/teams-toolkit-cli package -m ./appPackage/manifest.json -o ./appPackage/build",
+    "validate": "npx @microsoft/teamsapp-cli validate --manifest-path ./appPackage/manifest.json",
+    "package": "npx @microsoft/teamsapp-cli package --manifest-path ./appPackage/manifest.json --output-zip-path ./appPackage/build/appPackage.zip",
     "test:api": "node scripts/test-api.js",
     "test": "npm run validate && npm run test:api",
     "build": "npm run package"
@@ -25,7 +25,7 @@
     "url": "https://github.com/Acidni-LLC/acidni-copilot-connector.git"
   },
   "devDependencies": {
-    "@microsoft/teams-toolkit-cli": "^3.0.0"
+    "@microsoft/teamsapp-cli": "^3.1.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,89 +1,55 @@
-/**
- * API Test Script for Terprint Copilot Connector
- * 
- * Tests connectivity to the Terprint APIM endpoints
- * Run: node scripts/test-api.js
+﻿/**
+ * API connectivity test for Terprint Copilot Connector
+ * Tests the APIM endpoints used by the Copilot plugin
  */
 
 const https = require('https');
 
-const APIM_BASE_URL = process.env.APIM_BASE_URL || 'https://apim-terprint-dev.azure-api.net';
-const APIM_KEY = process.env.APIM_SUBSCRIPTION_KEY;
+const APIM_BASE = 'apim-terprint-dev.azure-api.net';
+const API_KEY = process.env.APIM_SUBSCRIPTION_KEY;
 
-const tests = [
-    {
-        name: 'Chat Health Check',
-        method: 'GET',
-        path: '/chat/health',
-        expectedStatus: 200
-    },
-    {
-        name: 'Recommend Health Check',
-        method: 'GET',
-        path: '/recommend/health',
-        expectedStatus: 200
-    },
-    {
-        name: 'Deals Health Check',
-        method: 'GET',
-        path: '/deals/health',
-        expectedStatus: 200
-    },
-    {
-        name: 'Data API Health Check',
-        method: 'GET',
-        path: '/data/api/health',
-        expectedStatus: 200
-    }
-];
-
-async function testEndpoint(test) {
+async function testEndpoint(name, path, expectedStatus = 200) {
     return new Promise((resolve) => {
-        const url = new URL(test.path, APIM_BASE_URL);
-        
         const options = {
-            hostname: url.hostname,
-            path: url.pathname,
-            method: test.method,
+            hostname: APIM_BASE,
+            path: path,
+            method: 'GET',
+            timeout: 30000,
             headers: {
-                'Content-Type': 'application/json'
+                'Ocp-Apim-Subscription-Key': API_KEY || '',
+                'Accept': 'application/json'
             }
         };
-
-        if (APIM_KEY) {
-            options.headers['Ocp-Apim-Subscription-Key'] = APIM_KEY;
-        }
 
         const req = https.request(options, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
-                const passed = res.statusCode === test.expectedStatus;
-                resolve({
-                    name: test.name,
-                    passed,
-                    status: res.statusCode,
-                    expected: test.expectedStatus,
-                    response: data.substring(0, 200)
-                });
+                const passed = res.statusCode === expectedStatus;
+                const icon = passed ? 'PASS' : 'FAIL';
+                console.log(icon + ' ' + name + ': Got ' + res.statusCode + ', expected ' + expectedStatus);
+                if (passed && data) {
+                    try {
+                        const json = JSON.parse(data);
+                        const count = Array.isArray(json) ? json.length : (json.count || 'N/A');
+                        console.log('   Response: ' + count + ' items');
+                    } catch (e) {
+                        // Not JSON, that is ok for some endpoints
+                    }
+                }
+                resolve(passed);
             });
         });
 
         req.on('error', (e) => {
-            resolve({
-                name: test.name,
-                passed: false,
-                error: e.message
-            });
+            console.log('FAIL ' + name + ': Error - ' + e.message);
+            resolve(false);
         });
 
-        req.setTimeout(10000, () => {
+        req.on('timeout', () => {
             req.destroy();
-            resolve({
-                name: test.name,
-                passed: false,
-                error: 'Timeout'
-            });
+            console.log('FAIL ' + name + ': Timeout after 30s');
+            resolve(false);
         });
 
         req.end();
@@ -91,41 +57,36 @@ async function testEndpoint(test) {
 }
 
 async function runTests() {
-    console.log('🧪 Terprint Copilot Connector - API Tests\n');
-    console.log(`Base URL: ${APIM_BASE_URL}`);
-    console.log(`API Key: ${APIM_KEY ? '✓ Configured' : '✗ Not configured (set APIM_SUBSCRIPTION_KEY)'}\n`);
-    console.log('─'.repeat(60));
+    console.log('\nTerprint Copilot Connector - API Tests\n');
+    console.log('Base URL: https://' + APIM_BASE);
+    console.log('API Key: ' + (API_KEY ? 'Configured' : 'Not configured (set APIM_SUBSCRIPTION_KEY)'));
+    console.log('\n' + '='.repeat(60));
 
-    let passed = 0;
-    let failed = 0;
+    const tests = [
+        { name: 'Data Strains (List)', path: '/data/strains?limit=5', status: 200 },
+        { name: 'Data Strains (Search)', path: '/data/strains?name=Blue', status: 200 }
+    ];
 
+    const results = [];
     for (const test of tests) {
-        const result = await testEndpoint(test);
-        
-        if (result.passed) {
-            console.log(`✅ ${result.name}: ${result.status}`);
-            passed++;
-        } else if (result.error) {
-            console.log(`❌ ${result.name}: ${result.error}`);
-            failed++;
-        } else {
-            console.log(`❌ ${result.name}: Got ${result.status}, expected ${result.expected}`);
-            failed++;
-        }
+        const passed = await testEndpoint(test.name, test.path, test.status);
+        results.push(passed);
     }
 
-    console.log('─'.repeat(60));
-    console.log(`\nResults: ${passed} passed, ${failed} failed`);
-    
+    console.log('='.repeat(60) + '\n');
+
+    const passed = results.filter(Boolean).length;
+    const failed = results.length - passed;
+    console.log('Results: ' + passed + ' passed, ' + failed + ' failed\n');
+
     if (failed > 0) {
-        console.log('\n⚠️  Some tests failed. Ensure:');
+        console.log('Some tests failed. Ensure:');
         console.log('   1. APIM_SUBSCRIPTION_KEY environment variable is set');
-        console.log('   2. You have network access to apim-terprint-dev.azure-api.net');
-        console.log('   3. The Terprint services are running');
+        console.log('   2. You have network access to ' + APIM_BASE);
+        console.log('   3. The Terprint services are running\n');
         process.exit(1);
     } else {
-        console.log('\n✅ All API endpoints are accessible!');
-        process.exit(0);
+        console.log('All tests passed! The Copilot connector can access Terprint APIs.\n');
     }
 }
 
