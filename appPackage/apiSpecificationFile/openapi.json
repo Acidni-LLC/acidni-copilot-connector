@@ -1,39 +1,105 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.0",
   "info": {
-    "title": "Terprint AI Copilot Plugin API",
-    "description": "API plugin for Microsoft 365 Copilot integration with Terprint cannabis analytics services",
-    "version": "1.0.0"
+    "title": "Terprint AI API",
+    "description": "API for accessing Terprint cannabis data including strains, lab reports, dispensary locations, deals, and user favorites.",
+    "version": "3.7.0"
   },
   "servers": [
     {
-      "url": "https://apim-terprint-dev.azure-api.net",
-      "description": "Terprint API Gateway"
+      "url": "https://apim-terprint-dev.azure-api.net/copilot",
+      "description": "Azure APIM Production"
     }
   ],
   "paths": {
-    "/data/strains": {
+    "/version": {
       "get": {
-        "operationId": "searchStrains",
-        "summary": "Search cannabis strains",
-        "description": "Search and retrieve information about cannabis strains including type, genetics, and profiles. Use this to answer questions about specific strains or search for strains.",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Search term to filter strains by name"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": { "type": "integer", "default": 10 },
-            "description": "Number of results to return"
+        "operationId": "getVersion",
+        "summary": "Get API version and feature info",
+        "description": "Returns the current version of the Terprint AI API and enabled features.",
+        "responses": {
+          "200": {
+            "description": "Version information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "version": { "type": "string" },
+                    "features": { "type": "array", "items": { "type": "string" } },
+                    "powered_by": { "type": "string" },
+                    "website": { "type": "string" }
+                  }
+                }
+              }
+            }
           }
+        }
+      }
+    },
+    "/ask": {
+      "post": {
+        "operationId": "askTerprint",
+        "summary": "Ask Terprint AI a question",
+        "description": "Send a natural language query to Terprint AI about cannabis strains, effects, terpenes, etc.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": { "type": "string" },
+                  "user_id": { "type": "string" },
+                  "user_email": { "type": "string" },
+                  "session_id": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "answer": { "type": "string" },
+                    "sources": { 
+                      "type": "array", 
+                      "items": { 
+                        "type": "object",
+                        "properties": {
+                          "title": { "type": "string" },
+                          "url": { "type": "string" },
+                          "type": { "type": "string" }
+                        }
+                      } 
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batches": {
+      "get": {
+        "operationId": "getBatches",
+        "summary": "Get lab test batches",
+        "parameters": [
+          { "name": "strain_name", "in": "query", "schema": { "type": "string" } },
+          { "name": "dispensary", "in": "query", "schema": { "type": "string" } },
+          { "name": "strain_type", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "List of batches",
             "content": {
               "application/json": {
                 "schema": {
@@ -44,21 +110,13 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": { "type": "string" },
-                          "name": { "type": "string" },
-                          "strain_type": { "type": "string" },
-                          "genetics": { "type": "string" },
-                          "terpene_profile": { "type": "object" },
-                          "cannabinoid_profile": { "type": "object" }
+                          "strainName": { "type": "string" },
+                          "dispensary": { "type": "string" },
+                          "strainType": { "type": "string" },
+                          "THC": { "type": "number" },
+                          "totalTerpenes": { "type": "number" },
+                          "batchDate": { "type": "string" }
                         }
-                      }
-                    },
-                    "pagination": {
-                      "type": "object",
-                      "properties": {
-                        "total": { "type": "integer" },
-                        "limit": { "type": "integer" },
-                        "offset": { "type": "integer" }
                       }
                     }
                   }
@@ -69,89 +127,28 @@
         }
       }
     },
-    "/data/strains/{strainId}": {
+    "/strains": {
       "get": {
-        "operationId": "getStrainDetails",
-        "summary": "Get strain details",
-        "description": "Get detailed information about a specific cannabis strain by ID or slug name.",
+        "operationId": "getStrains",
+        "summary": "List strains",
         "parameters": [
-          {
-            "name": "strainId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Strain ID or slug name"
-          }
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
         ],
         "responses": {
           "200": {
-            "description": "Strain details",
+            "description": "List of strains",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "name": { "type": "string" },
-                    "strain_type": { "type": "string" },
-                    "genetics": { "type": "string" },
-                    "terpene_profile": { "type": "object" },
-                    "cannabinoid_profile": { "type": "object" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/recommend/strains": {
-      "post": {
-        "operationId": "getRecommendations",
-        "summary": "Get personalized strain recommendations",
-        "description": "Returns personalized cannabis strain recommendations based on user preferences or symptoms.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "effects": {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Desired effects like relaxation, energy"
-                  },
-                  "flavors": {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Preferred flavor profiles"
-                  },
-                  "limit": {
-                    "type": "integer",
-                    "default": 5
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Recommendations returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "recommendations": {
+                    "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
                           "name": { "type": "string" },
-                          "matchScore": { "type": "number" },
-                          "reasoning": { "type": "string" }
+                          "strain_type": { "type": "string" }
                         }
                       }
                     }
@@ -163,43 +160,57 @@
         }
       }
     },
-    "/deals/search": {
+    "/locations": {
       "get": {
-        "operationId": "searchDeals",
-        "summary": "Find cannabis deals and promotions",
-        "description": "Search for current deals at Florida dispensaries.",
+        "operationId": "getLocations",
+        "summary": "Find dispensary locations",
         "parameters": [
-          {
-            "name": "strain",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Strain name to search"
-          },
-          {
-            "name": "dispensary",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Dispensary name filter"
-          },
-          {
-            "name": "maxPrice",
-            "in": "query",
-            "schema": { "type": "number" },
-            "description": "Maximum price"
-          },
-          {
-            "name": "category",
-            "in": "query",
-            "schema": { 
-              "type": "string",
-              "enum": ["flower", "concentrate", "edible", "vape", "topical"]
-            },
-            "description": "Product category"
-          }
+          { "name": "city", "in": "query", "schema": { "type": "string" } },
+          { "name": "county", "in": "query", "schema": { "type": "string" } },
+          { "name": "company", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
         ],
         "responses": {
           "200": {
-            "description": "Deals found",
+            "description": "Dispensary locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "company": { "type": "string" },
+                          "city": { "type": "string" },
+                          "address": { "type": "string" },
+                          "county": { "type": "string" },
+                          "zip_code": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deals": {
+      "get": {
+        "operationId": "getDeals",
+        "summary": "Get current deals",
+        "parameters": [
+          { "name": "dispensary", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active deals",
             "content": {
               "application/json": {
                 "schema": {
@@ -210,11 +221,13 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "productName": { "type": "string" },
+                          "strain_name": { "type": "string" },
                           "dispensary": { "type": "string" },
-                          "originalPrice": { "type": "number" },
-                          "salePrice": { "type": "number" },
-                          "discount": { "type": "string" }
+                          "category": { "type": "string" },
+                          "original_price": { "type": "number" },
+                          "sale_price": { "type": "number" },
+                          "discount_percent": { "type": "number" },
+                          "description": { "type": "string" }
                         }
                       }
                     }
@@ -226,51 +239,29 @@
         }
       }
     },
-    "/data/api/locations/search": {
+    "/favorites": {
       "get": {
-        "operationId": "searchLocations",
-        "summary": "Find dispensary locations",
-        "description": "Search for medical marijuana dispensaries in Florida.",
+        "operationId": "getFavorites",
+        "summary": "Get user favorites",
         "parameters": [
-          {
-            "name": "city",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "City name"
-          },
-          {
-            "name": "dispensary",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Dispensary brand"
-          },
-          {
-            "name": "zip",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "ZIP code"
-          }
+          { "name": "user_id", "in": "query", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
           "200": {
-            "description": "Locations found",
+            "description": "User's favorite strains",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "locations": {
+                    "favorites": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "name": { "type": "string" },
-                          "dispensary": { "type": "string" },
-                          "address": { "type": "string" },
-                          "city": { "type": "string" },
-                          "state": { "type": "string" },
-                          "zip": { "type": "string" },
-                          "phone": { "type": "string" }
+                          "strain_name": { "type": "string" },
+                          "added_date": { "type": "string" },
+                          "notes": { "type": "string" }
                         }
                       }
                     }
@@ -280,20 +271,92 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "addFavorite",
+        "summary": "Add to favorites",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": { "type": "string" },
+                  "strain_name": { "type": "string" },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "strain_name": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeFavorite",
+        "summary": "Remove from favorites",
+        "parameters": [
+          { "name": "user_id", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "strain_name", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success message"
+          }
+        }
       }
-    }
-  },
-  "security": [
-    {
-      "apiKey": []
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "apiKey": {
-        "type": "apiKey",
-        "name": "Ocp-Apim-Subscription-Key",
-        "in": "header"
+    },
+    "/stock": {
+      "get": {
+        "operationId": "checkStock",
+        "summary": "Check strain stock",
+        "parameters": [
+          { "name": "strain", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "zip_code", "in": "query", "schema": { "type": "string" } },
+          { "name": "dispensary", "in": "query", "schema": { "type": "string" } },
+          { "name": "max_price", "in": "query", "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "availability": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dispensary": { "type": "string" },
+                          "location": { "type": "string" },
+                          "in_stock": { "type": "boolean" },
+                          "price": { "type": "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
