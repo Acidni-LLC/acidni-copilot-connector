@@ -1,0 +1,65 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "🌿 Welcome to Terprint AI!",
+      "size": "Large",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "Your cannabis intelligence assistant for Florida medical marijuana patients.",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "What I can help with:",
+      "weight": "Bolder",
+      "spacing": "Medium"
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "🔍",
+          "value": "Search 5,000+ strains by name, type, or effects"
+        },
+        {
+          "title": "💊",
+          "value": "Get personalized strain recommendations"
+        },
+        {
+          "title": "💰",
+          "value": "Find the best deals at Florida dispensaries"
+        },
+        {
+          "title": "📍",
+          "value": "Locate MMTCs near you with directions"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "💡 **Tip**: Use me in the compose box to search and share strain info with colleagues!",
+      "wrap": true,
+      "spacing": "Medium",
+      "isSubtle": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Open Dashboard",
+      "url": "https://portal.terprint.net/dashboard"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "Browse Strains",
+      "url": "https://portal.terprint.net/strains"
+    }
+  ]
+}

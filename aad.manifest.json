@@ -5,7 +5,16 @@
   "accessTokenAcceptedVersion": 2,
   "signInAudience": "AzureADMyOrg",
   "optionalClaims": {
-    "idToken": [],
+    "idToken": [
+      {
+        "name": "email",
+        "essential": false
+      },
+      {
+        "name": "upn",
+        "essential": false
+      }
+    ],
     "accessToken": [
       {
         "name": "email",
@@ -13,6 +22,10 @@
       },
       {
         "name": "upn",
+        "essential": false
+      },
+      {
+        "name": "idtyp",
         "essential": false
       }
     ],
@@ -28,6 +41,10 @@
         },
         {
           "id": "64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0",
+          "type": "Scope"
+        },
+        {
+          "id": "14dad69e-099b-42c9-810b-d002981feec1",
           "type": "Scope"
         }
       ]
@@ -51,6 +68,12 @@
       "permissionIds": [
         "${{AAD_APP_ACCESS_AS_USER_PERMISSION_ID}}"
       ]
+    },
+    {
+      "appId": "27922004-5251-4030-b22d-91ecd9a37ea4",
+      "permissionIds": [
+        "${{AAD_APP_ACCESS_AS_USER_PERMISSION_ID}}"
+      ]
     }
   ],
   "identifierUris": [
@@ -60,6 +83,25 @@
     {
       "url": "https://teams.microsoft.com/api/platform/v1.0/oAuthConsentRedirect",
       "type": "Web"
+    },
+    {
+      "url": "https://copilot.microsoft.com/api/auth/callback",
+      "type": "Web"
     }
-  ]
+  ],
+  "api": {
+    "oauth2PermissionScopes": [
+      {
+        "adminConsentDescription": "Allow the application to access Terprint API on behalf of the signed-in user.",
+        "adminConsentDisplayName": "Access Terprint API",
+        "id": "${{AAD_APP_ACCESS_AS_USER_PERMISSION_ID}}",
+        "isEnabled": true,
+        "type": "User",
+        "userConsentDescription": "Allow the application to access Terprint API on your behalf.",
+        "userConsentDisplayName": "Access Terprint API",
+        "value": "Terprint.Access"
+      }
+    ],
+    "requestedAccessTokenVersion": 2
+  }
 }

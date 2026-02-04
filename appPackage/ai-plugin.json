@@ -2,16 +2,22 @@
   "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
   "schema_version": "v2.2",
   "name_for_human": "Terprint AI",
-  "description_for_human": "Cannabis strain intelligence - strains, lab data, terpenes, dispensaries",
+  "description_for_human": "Your cannabis intelligence assistant - strains, recommendations, deals, and dispensary locations for Florida medical marijuana patients.",
   "namespace": "terprint",
-  "description_for_model": "Terprint AI v3.15.0 - Cannabis strain intelligence with lab data.\n\nAvailable tools:\n- getVersion: API health and version info\n- getStrains: List/search cannabis strains\n- getBatches: Get lab test data with terpene and cannabinoid profiles\n- searchData: Full-text search for strains and batches\n- getLocations: Find dispensary locations\n\nUse getBatches for COA/lab data questions. Use searchData for general queries.",
+  "description_for_model": "Terprint AI v3.15.0 - Cannabis intelligence for Florida medical marijuana patients.\n\nAvailable capabilities:\n- chatWithTerprint: Answer open-ended cannabis questions about strains, terpenes, effects, and medical uses\n- getStrains: Search and browse cannabis strains by name, type, effects, or terpenes\n- getRecommendations: Get personalized strain suggestions based on desired effects or activities\n- searchDeals: Find the best prices and promotions at Florida dispensaries\n- findDispensaries: Locate medical marijuana dispensaries by city or ZIP code\n\nUsage guidance:\n- Use chatWithTerprint for general educational questions\n- Use getStrains when users want to browse or search specific strains\n- Use getRecommendations when users describe what they're looking for (effects, symptoms, activities)\n- Use searchDeals before recommending purchases to show current pricing\n- Use findDispensaries when users mention location or ask where to buy",
   "functions": [
     {
-      "name": "getVersion",
-      "description": "Get API health and version info. Use when asked about version or identity.",
+      "name": "chatWithTerprint",
+      "description": "Have a natural conversation about cannabis. Use for open-ended questions about strains, effects, terpenes, medical uses, consumption methods, and general cannabis education. Best for 'What is...', 'How does...', 'Why...' questions.",
       "parameters": {
         "type": "object",
-        "properties": {}
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The user's question about cannabis (required)"
+          }
+        }
       },
       "capabilities": {
         "response_semantics": {
@@ -21,110 +27,346 @@
     },
     {
       "name": "getStrains",
-      "description": "List or search cannabis strains. Returns strain names, types, and details.",
+      "description": "Search and browse cannabis strains by name, type (indica/sativa/hybrid), effects, or terpene profiles. Returns strain details including THC/CBD levels, effects, and flavors. Use when users want to look up specific strains or browse by category.",
       "parameters": {
         "type": "object",
         "properties": {
           "strain_name": {
             "type": "string",
-            "description": "Filter by strain name (partial match)"
+            "description": "Strain name to search (partial match supported)"
           },
           "type": {
             "type": "string",
-            "description": "Filter by type: indica, sativa, hybrid"
+            "description": "Cannabis type: indica (relaxing), sativa (energizing), or hybrid (balanced)"
+          },
+          "effect": {
+            "type": "string",
+            "description": "Desired effect: relaxed, euphoric, creative, focused, sleepy, hungry"
+          },
+          "terpene": {
+            "type": "string",
+            "description": "Dominant terpene: myrcene, limonene, caryophyllene, pinene, linalool"
           },
           "limit": {
             "type": "integer",
-            "description": "Max results (default 25)"
+            "description": "Max results to return (default 25)"
           }
         }
       },
       "capabilities": {
         "response_semantics": {
-          "data_path": "$.data"
+          "data_path": "$.data",
+          "static_template": {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "TextBlock",
+                "text": "${name}",
+                "size": "Large",
+                "weight": "Bolder"
+              },
+              {
+                "type": "TextBlock",
+                "text": "${if(type == 'indica', '🌙 Indica', if(type == 'sativa', '☀️ Sativa', '🌿 Hybrid'))}",
+                "spacing": "None"
+              },
+              {
+                "type": "FactSet",
+                "facts": [
+                  { "title": "THC", "value": "${formatNumber(thc_avg, 1)}%" },
+                  { "title": "CBD", "value": "${formatNumber(cbd_avg, 1)}%" },
+                  { "title": "Top Terpene", "value": "${if(dominant_terpene, dominant_terpene, 'N/A')}" }
+                ]
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.OpenUrl",
+                "title": "View Details",
+                "url": "https://terprint.acidni.net/strains/${id}"
+              }
+            ]
+          }
         }
       }
     },
     {
-      "name": "getBatches",
-      "description": "Get lab test batches with terpene and cannabinoid profiles. Use for COA data, THC%, terpene profiles.",
+      "name": "getRecommendations",
+      "description": "Get personalized strain recommendations based on desired effects like relaxation, focus, creativity, or pain relief. Considers experience level and time of day. Use when users describe what they want to feel or achieve.",
       "parameters": {
         "type": "object",
         "properties": {
+          "effects": {
+            "type": "string",
+            "description": "Desired effects (comma-separated): relaxation, focus, creativity, energy, sleep, pain_relief, anxiety_relief"
+          },
+          "avoid_effects": {
+            "type": "string",
+            "description": "Effects to avoid: anxiety, paranoia, drowsiness"
+          },
+          "activity": {
+            "type": "string",
+            "description": "Planned activity: work, social, exercise, creative_project, relaxing, sleeping"
+          },
+          "experience_level": {
+            "type": "string",
+            "description": "User's experience: beginner, intermediate, experienced"
+          },
+          "preferred_type": {
+            "type": "string",
+            "description": "Preferred type: indica, sativa, hybrid, or any"
+          },
+          "time_of_day": {
+            "type": "string",
+            "description": "When using: morning, afternoon, evening, night"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of recommendations (default 5)"
+          }
+        }
+      },
+      "capabilities": {
+        "response_semantics": {
+          "data_path": "$.recommendations",
+          "static_template": {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "Container",
+                "style": "accent",
+                "items": [
+                  { "type": "TextBlock", "text": "✨ Recommended for You", "weight": "Bolder", "color": "Light" }
+                ]
+              },
+              {
+                "type": "TextBlock",
+                "text": "${strain.name}",
+                "size": "Large",
+                "weight": "Bolder",
+                "spacing": "Medium"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Match: ${match_score}%",
+                "color": "Good",
+                "weight": "Bolder"
+              },
+              {
+                "type": "FactSet",
+                "facts": [
+                  { "title": "Type", "value": "${strain.type}" },
+                  { "title": "THC", "value": "${formatNumber(strain.thc_avg, 1)}%" },
+                  { "title": "Top Terpene", "value": "${if(strain.dominant_terpene, strain.dominant_terpene, 'N/A')}" }
+                ]
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.OpenUrl",
+                "title": "View Strain",
+                "url": "https://terprint.acidni.net/strains/${strain.id}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "searchDeals",
+      "description": "Find the best cannabis deals and prices at Florida dispensaries. Search by location, product type, strain, or price range. Use before recommending specific products to show current pricing and promotions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "City name: Orlando, Tampa, Miami, Jacksonville, etc."
+          },
+          "zip": {
+            "type": "string",
+            "description": "ZIP code to search near"
+          },
+          "dispensary_name": {
+            "type": "string",
+            "description": "Dispensary: Trulieve, Surterra, Curaleaf, Fluent, MÜV"
+          },
+          "product_type": {
+            "type": "string",
+            "description": "Product: flower, vape, concentrate, edible, topical, tincture"
+          },
           "strain_name": {
             "type": "string",
-            "description": "Filter by strain name"
+            "description": "Filter deals for a specific strain"
           },
-          "dispensary_id": {
-            "type": "string",
-            "description": "Filter by dispensary"
-          },
-          "min_thc": {
+          "max_price": {
             "type": "number",
-            "description": "Minimum THC percentage"
+            "description": "Maximum price in USD"
           },
-          "min_terpenes": {
+          "min_discount": {
             "type": "number",
-            "description": "Minimum total terpenes percentage"
+            "description": "Minimum discount percentage"
           },
-          "include": {
+          "sort_by": {
             "type": "string",
-            "description": "Include profiles: terpenes, cannabinoids, or full"
+            "description": "Sort: price_low, price_high, discount, newest"
           },
           "limit": {
             "type": "integer",
-            "description": "Max results (default 25)"
+            "description": "Max deals to return (default 20)"
           }
         }
       },
       "capabilities": {
         "response_semantics": {
-          "data_path": "$.data"
+          "data_path": "$.deals",
+          "static_template": {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "Container",
+                "style": "good",
+                "items": [
+                  { "type": "TextBlock", "text": "🔥 ${title}", "weight": "Bolder", "color": "Light", "wrap": true }
+                ]
+              },
+              {
+                "type": "TextBlock",
+                "text": "${dispensary_name}",
+                "size": "Medium",
+                "weight": "Bolder",
+                "spacing": "Medium"
+              },
+              {
+                "type": "ColumnSet",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                      { "type": "TextBlock", "text": "$${formatNumber(sale_price, 2)}", "size": "ExtraLarge", "weight": "Bolder", "color": "Good" }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      { "type": "TextBlock", "text": "${formatNumber(discount_percent, 0)}% OFF", "weight": "Bolder", "color": "Accent" },
+                      { "type": "TextBlock", "text": "Was $${formatNumber(original_price, 2)}", "size": "Small", "isSubtle": true, "spacing": "None" }
+                    ],
+                    "verticalContentAlignment": "Center"
+                  }
+                ]
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.OpenUrl",
+                "title": "View Deal",
+                "url": "https://terprint.acidni.net/deals/${id}"
+              },
+              {
+                "type": "Action.OpenUrl",
+                "title": "Get Directions",
+                "url": "https://www.google.com/maps/search/?api=1&query=${dispensary_name}"
+              }
+            ]
+          }
         }
       }
     },
     {
-      "name": "searchData",
-      "description": "Full-text search for strains and batches. Use for general cannabis queries.",
+      "name": "findDispensaries",
+      "description": "Locate medical marijuana dispensaries near a city or ZIP code in Florida. Returns addresses, hours, phone numbers, and distance. Use when users ask where to buy or mention a location.",
       "parameters": {
         "type": "object",
-        "required": ["q"],
         "properties": {
-          "q": {
+          "city": {
             "type": "string",
-            "description": "Search query (required)"
+            "description": "City name: Orlando, Tampa, Miami, Jacksonville, Gainesville, etc."
           },
-          "type": {
+          "zip": {
             "type": "string",
-            "description": "Search type: strain, batch, or both"
+            "description": "ZIP code to search near"
+          },
+          "brand": {
+            "type": "string",
+            "description": "Filter by brand: Trulieve, Surterra, Curaleaf, Fluent, MÜV, VidaCann"
+          },
+          "radius_miles": {
+            "type": "integer",
+            "description": "Search radius in miles (default 25)"
+          },
+          "open_now": {
+            "type": "boolean",
+            "description": "Only show currently open dispensaries"
+          },
+          "has_delivery": {
+            "type": "boolean",
+            "description": "Only show dispensaries with delivery"
           },
           "limit": {
             "type": "integer",
-            "description": "Max results (default 20)"
+            "description": "Max dispensaries to return (default 20)"
           }
         }
       },
       "capabilities": {
         "response_semantics": {
-          "data_path": "$.data"
-        }
-      }
-    },
-    {
-      "name": "getLocations",
-      "description": "List dispensary locations in Florida.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "limit": {
-            "type": "integer",
-            "description": "Max results (default 50)"
+          "data_path": "$.dispensaries",
+          "static_template": {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "ColumnSet",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      { "type": "TextBlock", "text": "${name}", "size": "Large", "weight": "Bolder", "wrap": true },
+                      { "type": "TextBlock", "text": "${if(brand, brand, '')}", "size": "Small", "isSubtle": true, "spacing": "None" }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                      { "type": "TextBlock", "text": "${if(distance_miles, formatNumber(distance_miles, 1) + ' mi', '')}", "size": "Large", "weight": "Bolder", "color": "Accent" }
+                    ],
+                    "verticalContentAlignment": "Center"
+                  }
+                ]
+              },
+              {
+                "type": "FactSet",
+                "facts": [
+                  { "title": "📍 Address", "value": "${address}, ${city}, ${state} ${zip}" },
+                  { "title": "📞 Phone", "value": "${if(phone, phone, 'N/A')}" },
+                  { "title": "🕐 Hours", "value": "${if(hours, hours, 'Call for hours')}" }
+                ]
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.OpenUrl",
+                "title": "Get Directions",
+                "url": "https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}"
+              },
+              {
+                "type": "Action.OpenUrl",
+                "title": "Call",
+                "url": "tel:${phone}"
+              }
+            ]
           }
-        }
-      },
-      "capabilities": {
-        "response_semantics": {
-          "data_path": "$.data"
         }
       }
     }
@@ -133,13 +375,13 @@
     {
       "type": "OpenApi",
       "auth": {
-        "type": "ApiKeyPluginVault",
-        "reference_id": "${{TERPRINT_API_KEY_REGISTRATION_ID}}"
+        "type": "OAuthPluginVault",
+        "reference_id": "${{OAUTH_CONNECTION_ID}}"
       },
       "spec": {
         "url": "apiSpecificationFile/openapi.json"
       },
-      "run_for_functions": ["getVersion", "getStrains", "getBatches", "searchData", "getLocations"]
+      "run_for_functions": ["chatWithTerprint", "getStrains", "getRecommendations", "searchDeals", "findDispensaries"]
     }
   ]
 }

@@ -1,0 +1,80 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "warning",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "🔔 Deal Alert!",
+          "size": "Medium",
+          "weight": "Bolder"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "${dispensary_name}",
+      "size": "Large",
+      "weight": "Bolder",
+      "spacing": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${discount_text}",
+      "color": "Good",
+      "size": "Medium"
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Strain",
+          "value": "${strain_name}"
+        },
+        {
+          "title": "Regular Price",
+          "value": "$${formatNumber(original_price, 2)}"
+        },
+        {
+          "title": "Sale Price",
+          "value": "$${formatNumber(sale_price, 2)}"
+        },
+        {
+          "title": "Expires",
+          "value": "${expires}"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "This matches your saved favorite: **${strain_name}**",
+      "wrap": true,
+      "isSubtle": true,
+      "spacing": "Medium"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View Deal",
+      "url": "${deal_url}"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "📍 Get Directions",
+      "url": "https://www.google.com/maps/search/?api=1&query=${dispensary_address}"
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Dismiss",
+      "data": {
+        "action": "dismiss_deal",
+        "deal_id": "${deal_id}"
+      }
+    }
+  ]
+}

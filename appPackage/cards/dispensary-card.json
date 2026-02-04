@@ -1,0 +1,193 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "Image",
+                  "url": "https://terprint.acidni.net/images/dispensary-icons/${if(brand, toLower(brand), 'default')}.png",
+                  "size": "Medium",
+                  "style": "Default",
+                  "altText": "${name} logo"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${name}",
+                  "size": "Large",
+                  "weight": "Bolder",
+                  "wrap": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${if(brand, brand, '')}",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${if(distance_miles, formatNumber(distance_miles, 1) + ' mi', '')}",
+                  "size": "Large",
+                  "weight": "Bolder",
+                  "color": "Accent"
+                }
+              ],
+              "verticalContentAlignment": "Center",
+              "$when": "${distance_miles != null}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "📍",
+                  "size": "Medium"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${address}",
+                  "wrap": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${city}, ${state} ${zip}",
+                  "isSubtle": true,
+                  "spacing": "None"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Small",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "📞",
+                  "size": "Medium"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${if(phone, phone, 'Phone not available')}"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "$when": "${phone != null}"
+    },
+    {
+      "type": "Container",
+      "spacing": "Small",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "🕐",
+                  "size": "Medium"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${if(hours, hours, 'Hours not available')}",
+                  "wrap": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "$when": "${hours != null}"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "📍 Get Directions",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}",
+      "style": "positive"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "📞 Call",
+      "url": "tel:${phone}",
+      "$when": "${phone != null}"
+    },
+    {
+      "type": "Action.Submit",
+      "title": "💰 View Deals",
+      "data": {
+        "action": "searchDeals",
+        "dispensary_name": "${name}"
+      }
+    }
+  ]
+}

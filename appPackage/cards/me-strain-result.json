@@ -1,0 +1,133 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "${typeEmoji} ${name}",
+          "size": "Large",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "${typeLabel} Strain",
+          "spacing": "None",
+          "isSubtle": true
+        }
+      ]
+    },
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "THC",
+              "weight": "Bolder",
+              "horizontalAlignment": "Center"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${formatNumber(thc_avg, 1)}%",
+              "size": "ExtraLarge",
+              "color": "Good",
+              "horizontalAlignment": "Center"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "CBD",
+              "weight": "Bolder",
+              "horizontalAlignment": "Center"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${formatNumber(cbd_avg, 1)}%",
+              "size": "ExtraLarge",
+              "color": "Accent",
+              "horizontalAlignment": "Center"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Terpene",
+              "weight": "Bolder",
+              "horizontalAlignment": "Center"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${if(dominant_terpene, dominant_terpene, 'N/A')}",
+              "size": "Medium",
+              "horizontalAlignment": "Center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Effects",
+          "weight": "Bolder"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${join(effects, ', ')}",
+          "wrap": true,
+          "isSubtle": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Small",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Flavors",
+          "weight": "Bolder"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${join(flavors, ', ')}",
+          "wrap": true,
+          "isSubtle": true
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View Details",
+      "url": "https://portal.terprint.net/strains/${id}"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "🔍 Find Deals",
+      "url": "https://portal.terprint.net/deals?strain=${name}"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "accent",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "✨ ${title}",
+          "size": "Large",
+          "weight": "Bolder",
+          "color": "Light",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "${subtitle}",
+          "size": "Small",
+          "color": "Light",
+          "isSubtle": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "Image",
+                  "url": "${if(strain.imageUrl, strain.imageUrl, 'https://terprint.acidni.net/images/strain-placeholder.png')}",
+                  "size": "Medium"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${strain.name}",
+                  "size": "Large",
+                  "weight": "Bolder"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${if(strain.type == 'indica', '🌙 Indica', if(strain.type == 'sativa', '☀️ Sativa', '🌿 Hybrid'))}",
+                  "spacing": "None"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Match Score: ${match_score}%",
+                  "color": "Good",
+                  "weight": "Bolder",
+                  "spacing": "Small"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Why we recommend this:",
+          "weight": "Bolder",
+          "size": "Small"
+        },
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "✓ ${match_reasons[0]}",
+              "wrap": true,
+              "spacing": "Small"
+            }
+          ],
+          "$when": "${count(match_reasons) >= 1}"
+        },
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "✓ ${match_reasons[1]}",
+              "wrap": true,
+              "spacing": "Small"
+            }
+          ],
+          "$when": "${count(match_reasons) >= 2}"
+        },
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "✓ ${match_reasons[2]}",
+              "wrap": true,
+              "spacing": "Small"
+            }
+          ],
+          "$when": "${count(match_reasons) >= 3}"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "THC",
+              "value": "${formatNumber(strain.thc_avg, 1)}%"
+            },
+            {
+              "title": "CBD",
+              "value": "${formatNumber(strain.cbd_avg, 1)}%"
+            },
+            {
+              "title": "Top Terpene",
+              "value": "${if(strain.dominant_terpene, strain.dominant_terpene, 'N/A')}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Small",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Effects: ${if(strain.effects, join(strain.effects, ' • '), 'N/A')}",
+          "wrap": true,
+          "size": "Small",
+          "isSubtle": true
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "💰 Find Deals",
+      "data": {
+        "action": "searchDeals",
+        "strain_name": "${strain.name}"
+      },
+      "style": "positive"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "🔗 View Details",
+      "url": "https://terprint.acidni.net/strains/${strain.id}"
+    },
+    {
+      "type": "Action.Submit",
+      "title": "❤️ Save",
+      "data": {
+        "action": "saveFavorite",
+        "strain_id": "${strain.id}",
+        "strain_name": "${strain.name}"
+      }
+    }
+  ]
+}

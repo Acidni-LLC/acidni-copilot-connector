@@ -1,0 +1,173 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "good",
+      "bleed": true,
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "🔥 ${title}",
+          "size": "Large",
+          "weight": "Bolder",
+          "color": "Light",
+          "wrap": true
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${dispensary_name}",
+                  "weight": "Bolder",
+                  "size": "Medium"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${if(product_type, product_type, 'Cannabis Product')}",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "$${formatNumber(sale_price, 2)}",
+                  "size": "ExtraLarge",
+                  "weight": "Bolder",
+                  "color": "Good",
+                  "horizontalAlignment": "Right"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "~~$${formatNumber(original_price, 2)}~~",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "horizontalAlignment": "Right",
+                  "spacing": "None"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "1",
+              "items": [
+                {
+                  "type": "Container",
+                  "style": "accent",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "${formatNumber(discount_percent, 0)}% OFF",
+                      "weight": "Bolder",
+                      "horizontalAlignment": "Center",
+                      "color": "Light"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "2",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "You save: $${formatNumber(original_price - sale_price, 2)}",
+                  "weight": "Bolder",
+                  "color": "Good",
+                  "horizontalAlignment": "Center"
+                }
+              ],
+              "verticalContentAlignment": "Center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Strain",
+              "value": "${if(strain_name, strain_name, 'Various')}"
+            },
+            {
+              "title": "Valid Until",
+              "value": "${if(valid_until, formatDateTime(valid_until, 'MMM d, yyyy'), 'While supplies last')}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "${if(description, description, '')}",
+          "wrap": true,
+          "size": "Small",
+          "isSubtle": true
+        }
+      ],
+      "$when": "${description != null && description != ''}"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "🛒 View Deal",
+      "url": "https://terprint.acidni.net/deals/${id}",
+      "style": "positive"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "📍 Get Directions",
+      "url": "https://www.google.com/maps/search/?api=1&query=${dispensary_name}"
+    },
+    {
+      "type": "Action.Submit",
+      "title": "🔔 Set Alert",
+      "data": {
+        "action": "setPriceAlert",
+        "deal_id": "${id}",
+        "dispensary": "${dispensary_name}"
+      }
+    }
+  ]
+}
