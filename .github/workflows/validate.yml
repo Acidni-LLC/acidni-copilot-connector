@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Install dependencies
@@ -27,12 +27,28 @@ jobs:
 
       - name: Validate manifest
         run: npm run validate
-        continue-on-error: true
+
+      - name: Validate JSON schemas (Agent & Plugin)
+        run: npm run validate:schemas
 
       - name: Validate OpenAPI spec
         run: |
           npx @stoplight/spectral-cli lint appPackage/apiSpecificationFile/openapi.json
-        continue-on-error: true
+
+      - name: Check version sync (no drift)
+        run: |
+          node scripts/sync-version.js
+          git diff --exit-code || (echo "Version drift detected. Run 'npm run version:sync' locally and commit changes." && exit 1)
+
+      - name: Optional API smoke test (dev)
+        env:
+          APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_DEV }}
+        run: |
+          if [ -n "$APIM_SUBSCRIPTION_KEY" ]; then
+            npm run test:api
+          else
+            echo "Skipping API smoke test: APIM_SUBSCRIPTION_KEY_DEV not set"
+          fi
 
   package:
     name: Build Package
@@ -47,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Install dependencies
@@ -58,7 +74,6 @@ jobs:
           mkdir -p appPackage/build
           cd appPackage
           zip -r build/appPackage.zip manifest.json declarativeAgent.json ai-plugin.json apiSpecificationFile/ color.png outline.png
-        continue-on-error: true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

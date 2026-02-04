@@ -131,13 +131,29 @@ Usage metrics are captured via Application Insights:
 ## 🧪 Testing
 
 ### Validate Manifest
+
 ```bash
 npm run validate
 ```
 
+### Validate Agent & Plugin Schemas
+
+```bash
+npm run validate:schemas
+```
+
 ### Test API Connectivity
+
 ```bash
 npm run test:api
+```
+
+### Version Sync
+
+Keep version consistent across manifests and OpenAPI.
+
+```bash
+npm run version:sync
 ```
 
 ## 📝 Documentation
@@ -152,6 +168,7 @@ npm run test:api
 1. Fork the repository
 2. Create a feature branch
 3. Submit a pull request
+4. Ensure CI passes: manifest/schema validation, OpenAPI lint, version sync check
 
 ## 📄 License
 

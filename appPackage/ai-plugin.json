@@ -1,10 +1,10 @@
-﻿{
+{
   "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
   "schema_version": "v2.2",
   "name_for_human": "Terprint AI",
   "description_for_human": "Cannabis strain intelligence - strains, lab data, terpenes, dispensaries",
   "namespace": "terprint",
-  "description_for_model": "Terprint AI v3.8.0 - Cannabis strain intelligence with lab data.\n\nAvailable tools:\n- getVersion: API health and version info\n- getStrains: List/search cannabis strains\n- getBatches: Get lab test data with terpene and cannabinoid profiles\n- searchData: Full-text search for strains and batches\n- getLocations: Find dispensary locations\n\nUse getBatches for COA/lab data questions. Use searchData for general queries.",
+  "description_for_model": "Terprint AI v3.15.0 - Cannabis strain intelligence with lab data.\n\nAvailable tools:\n- getVersion: API health and version info\n- getStrains: List/search cannabis strains\n- getBatches: Get lab test data with terpene and cannabinoid profiles\n- searchData: Full-text search for strains and batches\n- getLocations: Find dispensary locations\n\nUse getBatches for COA/lab data questions. Use searchData for general queries.",
   "functions": [
     {
       "name": "getVersion",
@@ -133,7 +133,8 @@
     {
       "type": "OpenApi",
       "auth": {
-        "type": "None"
+        "type": "ApiKeyPluginVault",
+        "reference_id": "${{TERPRINT_API_KEY_REGISTRATION_ID}}"
       },
       "spec": {
         "url": "apiSpecificationFile/openapi.json"
