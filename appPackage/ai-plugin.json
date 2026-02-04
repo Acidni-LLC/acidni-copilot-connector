@@ -1,605 +1,130 @@
-{
+﻿{
   "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
   "schema_version": "v2.2",
   "name_for_human": "Terprint AI",
-  "description_for_human": "Cannabis strain intelligence - ask about strains, effects, terpenes, deals, dispensaries, favorites, and stock availability in Florida",
+  "description_for_human": "Cannabis strain intelligence - strains, lab data, terpenes, dispensaries",
   "namespace": "terprint",
-  "description_for_model": "Terprint AI v3.7.0 - Personalized cannabis strain intelligence with lab data and favorites.\n\nIMPORTANT: When user asks 'version', 'what version', 'app version', or 'who are you' ALWAYS call getVersion function first.\n\nAvailable functions:\n- Get Version (getVersion): Returns Terprint AI version info - USE THIS FOR VERSION QUESTIONS\n- Ask Terprint (askTerprint): General questions, recommendations, deals info - NOW WITH PERSONALIZATION\n- Get Batch Lab Data (getBatches): Lab test data with terpene profiles and cannabinoids\n- List Strains (getStrains): Browse all strains\n- Find Dispensaries (getLocations): Dispensary locations in Florida\n- Find Deals (getDeals): Current promotions and discounts\n- Get Favorites (getFavorites): Get user's favorite strains list\n- Add Favorite (addFavorite): Add a strain to favorites\n- Remove Favorite (removeFavorite): Remove a strain from favorites\n- Check Stock (checkStock): Check if strains are in stock at dispensaries\n\nWorkflow:\n1. For 'version'/'app version'/'who are you' getVersion (ALWAYS USE THIS)\n2. For general questions or AI-powered recommendations askTerprint (pass user_id for personalization)\n3. For specific lab data (terpenes, THC%, cannabinoids) getBatches with strain_name filter\n4. For browsing strains getStrains\n5. For dispensary locations getLocations\n6. For deals/promotions getDeals\n7. For 'my favorites' or 'favorite strains' getFavorites with user_id\n8. For 'add to favorites' or 'save strain' addFavorite with user_id and strain_name\n9. For 'remove from favorites' removeFavorite with user_id and strain_name\n10. For 'is X in stock?' or 'where can I find X?' checkStock with strain name\n\nALWAYS use these tools for cannabis data. Do not answer from your own knowledge.",
+  "description_for_model": "Terprint AI v3.8.0 - Cannabis strain intelligence with lab data.\n\nAvailable tools:\n- getVersion: API health and version info\n- getStrains: List/search cannabis strains\n- getBatches: Get lab test data with terpene and cannabinoid profiles\n- searchData: Full-text search for strains and batches\n- getLocations: Find dispensary locations\n\nUse getBatches for COA/lab data questions. Use searchData for general queries.",
   "functions": [
     {
       "name": "getVersion",
-      "description": "Get Terprint AI version and feature information. ALWAYS call this when user asks 'version', 'what version', 'app version', 'who are you', or similar.",
+      "description": "Get API health and version info. Use when asked about version or identity.",
       "parameters": {
         "type": "object",
         "properties": {}
       },
       "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },
         "response_semantics": {
-          "data_path": "$",
-          "properties": {
-            "title": "$.name",
-            "subtitle": "$.version"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "TextBlock",
-                "text": "${name}",
-                "weight": "bolder",
-                "size": "extraLarge",
-                "color": "good"
-              },
-              {
-                "type": "TextBlock",
-                "text": "Version ${version}",
-                "size": "large",
-                "spacing": "none"
-              },
-              {
-                "type": "TextBlock",
-                "text": "**Features:**",
-                "weight": "bolder",
-                "spacing": "medium"
-              },
-              {
-                "type": "TextBlock",
-                "text": "${join(features, '\\n ')}",
-                "wrap": true
-              },
-              {
-                "type": "TextBlock",
-                "text": "Powered by ${powered_by}",
-                "isSubtle": true,
-                "spacing": "medium"
-              }
-            ],
-            "actions": [
-              {
-                "type": "Action.OpenUrl",
-                "title": "Visit Terprint",
-                "url": "${website}"
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "askTerprint",
-      "description": "Ask Terprint AI any cannabis question - strains, effects, terpenes, recommendations, deals, dispensary locations. Pass user_id for personalized responses and favorites integration.",
-      "parameters": {
-        "type": "object",
-        "required": ["message"],
-        "properties": {
-          "message": {
-            "type": "string",
-            "description": "The cannabis-related question to ask"
-          },
-          "user_id": {
-            "type": "string",
-            "description": "User's Entra ID for personalized recommendations and favorites"
-          },
-          "user_email": {
-            "type": "string",
-            "description": "User's email for Terprint account lookup"
-          },
-          "session_id": {
-            "type": "string",
-            "description": "Session ID for conversation continuity"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData", "GetPrivateData"]
-        },
-        "response_semantics": {
-          "data_path": "$.sources",
-          "properties": {
-            "title": "$.title",
-            "subtitle": "$.type"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "${if(title, title, 'Source')}",
-                    "weight": "bolder",
-                    "size": "medium",
-                    "wrap": true
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${if(type, type, 'Cannabis Information')}",
-                    "spacing": "none",
-                    "isSubtle": true,
-                    "wrap": true
-                  }
-                ]
-              }
-            ],
-            "actions": [
-              {
-                "type": "Action.OpenUrl",
-                "title": "View Details",
-                "url": "${if(url, url, 'https://terprint.app')}"
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "getBatches",
-      "description": "Get cannabis batch lab test data including THC, CBD, terpene profiles, and cannabinoid profiles. Use this for specific lab data on strains.",
-      "parameters": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "strain_name": {
-            "type": "string",
-            "description": "Filter by strain name"
-          },
-          "dispensary": {
-            "type": "string",
-            "description": "Filter by dispensary (Flowery, Trulieve, etc.)"
-          },
-          "strain_type": {
-            "type": "string",
-            "description": "Filter by product type (Flower, Vape, Concentrate)"
-          },
-          "limit": {
-            "type": "integer",
-            "description": "Number of results (default 10, max 50)"
-          }
-        }
-      },
-      "capabilities": {        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },        "response_semantics": {
-          "data_path": "$.data",
-          "properties": {
-            "title": "$.strainName",
-            "subtitle": "$.dispensary"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "${strainName}",
-                    "weight": "bolder",
-                    "size": "medium",
-                    "wrap": true
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${dispensary}  ${strainType}",
-                    "spacing": "none",
-                    "isSubtle": true
-                  },
-                  {
-                    "type": "FactSet",
-                    "facts": [
-                      {
-                        "title": "THC",
-                        "value": "${THC}%"
-                      },
-                      {
-                        "title": "Terpenes",
-                        "value": "${totalTerpenes}%"
-                      },
-                      {
-                        "title": "Batch Date",
-                        "value": "${batchDate}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          "data_path": "$"
         }
       }
     },
     {
       "name": "getStrains",
-      "description": "Get list of cannabis strain names and types. Use to browse available strains.",
+      "description": "List or search cannabis strains. Returns strain names, types, and details.",
       "parameters": {
         "type": "object",
-        "required": [],
         "properties": {
+          "strain_name": {
+            "type": "string",
+            "description": "Filter by strain name (partial match)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Filter by type: indica, sativa, hybrid"
+          },
           "limit": {
             "type": "integer",
-            "description": "Number of results (default 20)"
+            "description": "Max results (default 25)"
           }
         }
       },
       "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },
         "response_semantics": {
-          "data_path": "$.data",
-          "properties": {
-            "title": "$.name",
-            "subtitle": "$.strain_type"
+          "data_path": "$.data"
+        }
+      }
+    },
+    {
+      "name": "getBatches",
+      "description": "Get lab test batches with terpene and cannabinoid profiles. Use for COA data, THC%, terpene profiles.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "strain_name": {
+            "type": "string",
+            "description": "Filter by strain name"
+          },
+          "dispensary_id": {
+            "type": "string",
+            "description": "Filter by dispensary"
+          },
+          "min_thc": {
+            "type": "number",
+            "description": "Minimum THC percentage"
+          },
+          "min_terpenes": {
+            "type": "number",
+            "description": "Minimum total terpenes percentage"
+          },
+          "include": {
+            "type": "string",
+            "description": "Include profiles: terpenes, cannabinoids, or full"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max results (default 25)"
           }
+        }
+      },
+      "capabilities": {
+        "response_semantics": {
+          "data_path": "$.data"
+        }
+      }
+    },
+    {
+      "name": "searchData",
+      "description": "Full-text search for strains and batches. Use for general cannabis queries.",
+      "parameters": {
+        "type": "object",
+        "required": ["q"],
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Search query (required)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Search type: strain, batch, or both"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max results (default 20)"
+          }
+        }
+      },
+      "capabilities": {
+        "response_semantics": {
+          "data_path": "$.data"
         }
       }
     },
     {
       "name": "getLocations",
-      "description": "Find dispensary locations in Florida. Filter by city, county, or company.",
+      "description": "List dispensary locations in Florida.",
       "parameters": {
         "type": "object",
-        "required": [],
         "properties": {
-          "city": {
-            "type": "string",
-            "description": "Filter by city (Orlando, Miami, Tampa, etc.)"
-          },
-          "county": {
-            "type": "string",
-            "description": "Filter by county"
-          },
-          "company": {
-            "type": "string",
-            "description": "Filter by dispensary company"
-          },
           "limit": {
             "type": "integer",
-            "description": "Number of results"
+            "description": "Max results (default 50)"
           }
         }
       },
       "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },
         "response_semantics": {
-          "data_path": "$.data",
-          "properties": {
-            "title": "$.company",
-            "subtitle": "$.city"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "${company}",
-                    "weight": "bolder",
-                    "size": "medium"
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${address}",
-                    "wrap": true
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${city}, ${county} ${zip_code}",
-                    "isSubtle": true
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "getDeals",
-      "description": "Search for current cannabis deals and promotions at Florida dispensaries.",
-      "parameters": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "dispensary": {
-            "type": "string",
-            "description": "Filter by dispensary name"
-          },
-          "category": {
-            "type": "string",
-            "description": "Filter by product category (flower, vape, edibles)"
-          },
-          "limit": {
-            "type": "integer",
-            "description": "Number of results"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },
-        "response_semantics": {
-          "data_path": "$.deals",
-          "properties": {
-            "title": "$.strain_name",
-            "subtitle": "$.dispensary"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "${strain_name}",
-                    "weight": "bolder",
-                    "size": "medium",
-                    "wrap": true
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${dispensary}  ${category}",
-                    "isSubtle": true
-                  },
-                  {
-                    "type": "FactSet",
-                    "facts": [
-                      {
-                        "title": "Was",
-                        "value": "$${original_price}"
-                      },
-                      {
-                        "title": "Now",
-                        "value": "$${sale_price}"
-                      },
-                      {
-                        "title": "Discount",
-                        "value": "${discount_percent}% off"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${description}",
-                    "wrap": true,
-                    "spacing": "small"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "getFavorites",
-      "description": "Get the user's favorite strains list. Use when user asks about their favorites or saved strains.",
-      "parameters": {
-        "type": "object",
-        "required": ["user_id"],
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "description": "User's Entra ID to look up their favorites"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPrivateData"]
-        },
-        "response_semantics": {
-          "data_path": "$.favorites",
-          "properties": {
-            "title": "$.strain_name",
-            "subtitle": "$.added_date"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": " ${strain_name}",
-                    "weight": "bolder",
-                    "size": "medium",
-                    "wrap": true
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "Added: ${added_date}",
-                    "isSubtle": true,
-                    "spacing": "none"
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${notes}",
-                    "wrap": true,
-                    "isSubtle": true,
-                    "$when": "${notes != ''}"
-                  }
-                ]
-              }
-            ],
-            "actions": [
-              {
-                "type": "Action.OpenUrl",
-                "title": "View on Terprint",
-                "url": "https://terprint.app/strains/${strain_name}"
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "addFavorite",
-      "description": "Add a strain to the user's favorites list. Use when user says 'add to favorites' or 'save this strain'.",
-      "parameters": {
-        "type": "object",
-        "required": ["user_id", "strain_name"],
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "description": "User's Entra ID"
-          },
-          "strain_name": {
-            "type": "string",
-            "description": "Name of the strain to add to favorites"
-          },
-          "notes": {
-            "type": "string",
-            "description": "Optional notes about the strain"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["ResourceStateUpdate"]
-        },
-        "response_semantics": {
-          "data_path": "$",
-          "properties": {
-            "title": "$.strain_name",
-            "subtitle": "$.message"
-          }
-        }
-      }
-    },
-    {
-      "name": "removeFavorite",
-      "description": "Remove a strain from the user's favorites list.",
-      "parameters": {
-        "type": "object",
-        "required": ["user_id", "strain_name"],
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "description": "User's Entra ID"
-          },
-          "strain_name": {
-            "type": "string",
-            "description": "Name of the strain to remove from favorites"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["ResourceStateUpdate"]
-        }
-      }
-    },
-    {
-      "name": "checkStock",
-      "description": "Check if a strain is in stock at nearby dispensaries. Great for checking favorites availability or finding where to buy a specific strain.",
-      "parameters": {
-        "type": "object",
-        "required": ["strain"],
-        "properties": {
-          "strain": {
-            "type": "string",
-            "description": "Strain name to search for"
-          },
-          "zip_code": {
-            "type": "string",
-            "description": "Zip code for location-based search"
-          },
-          "dispensary": {
-            "type": "string",
-            "description": "Filter by specific dispensary"
-          },
-          "max_price": {
-            "type": "number",
-            "description": "Maximum price filter"
-          }
-        }
-      },
-      "capabilities": {
-        "security_info": {
-          "data_handling": ["GetPublicData"]
-        },
-        "response_semantics": {
-          "data_path": "$.availability",
-          "properties": {
-            "title": "$.dispensary",
-            "subtitle": "$.location"
-          },
-          "static_template": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.5",
-            "body": [
-              {
-                "type": "Container",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "${dispensary}",
-                    "weight": "bolder",
-                    "size": "medium"
-                  },
-                  {
-                    "type": "TextBlock",
-                    "text": "${location}",
-                    "isSubtle": true,
-                    "spacing": "none"
-                  },
-                  {
-                    "type": "ColumnSet",
-                    "columns": [
-                      {
-                        "type": "Column",
-                        "width": "auto",
-                        "items": [
-                          {
-                            "type": "TextBlock",
-                            "text": "${if(in_stock, ' In Stock', ' Out of Stock')}",
-                            "color": "${if(in_stock, 'good', 'attention')}"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Column",
-                        "width": "auto",
-                        "items": [
-                          {
-                            "type": "TextBlock",
-                            "text": "$${price}",
-                            "weight": "bolder"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          "data_path": "$.data"
         }
       }
     }
@@ -613,7 +138,7 @@
       "spec": {
         "url": "apiSpecificationFile/openapi.json"
       },
-      "run_for_functions": ["getVersion", "askTerprint", "getBatches", "getStrains", "getLocations", "getDeals", "getFavorites", "addFavorite", "removeFavorite", "checkStock"]
+      "run_for_functions": ["getVersion", "getStrains", "getBatches", "searchData", "getLocations"]
     }
   ]
 }

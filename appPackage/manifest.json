@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
   "manifestVersion": "devPreview",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "id": "${{TEAMS_APP_ID}}",
   "developer": {
     "name": "Acidni LLC",
@@ -19,7 +19,7 @@
   },
   "description": {
     "short": "AI-powered cannabis strain intelligence with lab data and personalized favorites",
-    "full": "Terprint AI provides comprehensive cannabis intelligence including strain details, lab reports (COA), terpene profiles, dispensary locations, and deals in Florida. Version 3.7.0 introduces personalized favorites and stock checking."
+    "full": "Terprint AI provides comprehensive cannabis intelligence including strain details, lab reports (COA), terpene profiles, dispensary locations, and deals in Florida. Version 3.8.0 introduces strong stock checking capabilities."
   },
   "accentColor": "#10B981",
   "copilotAgents": {

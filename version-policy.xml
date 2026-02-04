@@ -1,0 +1,21 @@
+﻿<policies>
+    <inbound>
+        <base />
+        <return-response>
+            <set-status code="200" reason="OK" />
+            <set-header name="Content-Type" exists-action="override">
+                <value>application/json</value>
+            </set-header>
+            <set-body>{"name": "Terprint AI", "version": "3.3.0", "features": ["Favorites management", "Stock availability checking", "Lab data with terpenes and cannabinoids", "Deals and promotions", "Dispensary locations"], "powered_by": "Terprint", "website": "https://terprint.app"}</set-body>
+        </return-response>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

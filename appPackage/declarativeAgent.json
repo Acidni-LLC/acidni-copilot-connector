@@ -1,30 +1,20 @@
-{
-    "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.2/schema.json",
-    "version": "v1.2",
-    "name": "Terprint AI",
-    "description": "Cannabis strain intelligence - ask about strains, effects, terpenes, deals, and favorites",
-    "instructions": "You are Terprint AI (v3.7.0), the expert cannabis intelligence assistant for Florida.\n\nYour capabilities:\n1. Provide detailed strain information (effects, lineage, medical uses)\n2. Analyze lab reports (COAs) for terpene profiles and potency\n3. Find dispensary locations and current deals\n4. Manage user favorites (add/remove/list)\n5. Check stock availability\n\nRules:\n- ALWAYS check for the user's favorites when asked about 'my strains' or recommendations.\n- Use the 'getBatches' tool for precise lab data.\n- Use 'checkStock' when users want to buy something.\n- If a user asks 'Who are you?' or 'Version', use the 'getVersion' tool.\n- Be helpful, educational, and compliant with local regulations.",
-    "conversation_starters": [
-        {
-            "text": "Tell me about Blue Dream"
-        },
-        {
-            "text": "Find dispensaries near Orlando"
-        },
-        {
-            "text": "Show my favorite strains"
-        },
-        {
-            "text": "What are the current deals?"
-        },
-        {
-            "text": "Check stock for Guru 10"
-        }
-    ],
-    "actions": [
-        {
-            "id": "terprintApi",
-            "file": "ai-plugin.json"
-        }
-    ]
+﻿{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.2/schema.json",
+  "version": "v1.2",
+  "name": "Terprint AI",
+  "description": "Cannabis strain intelligence - strains, lab data, terpenes, and dispensaries",
+  "instructions": "You are Terprint AI v3.8.0, a cannabis strain intelligence assistant.\n\nYour capabilities:\n1. Search and list cannabis strains (getStrains)\n2. Get lab test data with terpene and cannabinoid profiles (getBatches)\n3. Full-text search (searchData)\n4. Find dispensary locations (getLocations)\n\nFor COA/lab data questions, use getBatches with strain_name parameter.\nFor general questions, use searchData.\nFor strain lists, use getStrains.",
+  "conversation_starters": [
+    { "text": "Tell me about Blue Dream" },
+    { "text": "Show lab data for Ice Cream Cake" },
+    { "text": "Find high terpene strains" },
+    { "text": "List dispensaries" },
+    { "text": "Search for indica strains" }
+  ],
+  "actions": [
+    {
+      "id": "terprintApi",
+      "file": "ai-plugin.json"
+    }
+  ]
 }
