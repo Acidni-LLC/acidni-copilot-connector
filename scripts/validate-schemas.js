@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const Ajv = require('ajv');
+const Ajv04 = require('ajv-draft-04');
 const addFormats = require('ajv-formats');
 
 async function fetchJson(url) {
@@ -36,7 +37,8 @@ async function validateFile(filePath) {
     return true;
   }
 
-  const ajv = new Ajv({ strict: false, allErrors: true });
+  // Use draft-04 compatible AJV for Microsoft schemas that reference draft-04
+  const ajv = new Ajv04({ strict: false, allErrors: true });
   addFormats(ajv);
 
   const schema = await fetchJson(schemaUrl);

@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
   "manifestVersion": "devPreview",
   "version": "3.20.0",
@@ -7,8 +7,7 @@
     "name": "Acidni LLC",
     "websiteUrl": "https://www.acidni.net",
     "privacyUrl": "https://www.acidni.net/privacy",
-    "termsOfUseUrl": "https://www.acidni.net/terms",
-    "mpnId": "${{MPN_ID}}"
+    "termsOfUseUrl": "https://www.acidni.net/terms"
   },
   "icons": {
     "color": "color.png",
@@ -19,8 +18,8 @@
     "full": "Terprint AI - Cannabis Intelligence for Florida MMJ Patients"
   },
   "description": {
-    "short": "AI-powered cannabis strain intelligence with lab data, deals, and personalized recommendations for Florida medical marijuana patients.",
-    "full": "Terprint AI brings comprehensive cannabis intelligence directly into Microsoft 365 Copilot and Teams.\n\n🌿 **Strain Database**\nSearch 5,000+ cannabis strains with lab-verified terpene and cannabinoid profiles. Get detailed information on effects, flavors, and medical applications.\n\n💊 **Personalized Recommendations**\nReceive AI-powered strain suggestions based on your desired effects, symptoms, or activities. Our recommendation engine matches you with the perfect strain.\n\n💰 **Real-Time Deal Finder**\nCompare prices across all Florida dispensaries in real-time. Never overpay - find the best deals on flower, concentrates, edibles, and more.\n\n📍 **Dispensary Locator**\nFind nearby Medical Marijuana Treatment Centers (MMTCs) with directions, hours, and current inventory availability.\n\n🔬 **Lab Data Integration**\nAccess Certificate of Analysis (COA) data including THC/CBD percentages, terpene profiles, and testing results.\n\n**Features:**\n• Natural language chat for cannabis questions\n• Strain comparison and analysis\n• Terpene education and effects\n• Florida MMUR compliance guidance\n• Personal favorites dashboard\n• Proactive deal notifications\n\n**For Florida Medical Marijuana Patients**\nTerprint AI is designed specifically for registered Florida medical marijuana patients seeking informed purchasing decisions. All data is sourced from licensed Florida dispensaries.\n\n**Privacy First**\nWe never store personal health information. Your conversations and preferences remain private and secure."
+    "short": "Florida cannabis strain intelligence - strains, deals & recommendations.",
+    "full": "Terprint AI brings comprehensive cannabis intelligence directly into Microsoft 365 Copilot and Teams.\n\n **Strain Database**\nSearch 5,000+ cannabis strains with lab-verified terpene and cannabinoid profiles.\n\n **Personalized Recommendations**\nReceive AI-powered strain suggestions based on your desired effects.\n\n **Real-Time Deal Finder**\nCompare prices across all Florida dispensaries in real-time.\n\n **Dispensary Locator**\nFind nearby Medical Marijuana Treatment Centers (MMTCs)."
   },
   "accentColor": "#10B981",
   "localizationInfo": {
@@ -34,79 +33,11 @@
       }
     ]
   },
-  "bots": [
-    {
-      "botId": "${{BOT_ID}}",
-      "scopes": ["personal", "team", "groupChat"],
-      "supportsFiles": false,
-      "isNotificationOnly": false,
-      "commandLists": [
-        {
-          "scopes": ["personal"],
-          "commands": [
-            {
-              "title": "help",
-              "description": "Show available Terprint commands"
-            },
-            {
-              "title": "deals",
-              "description": "Get today's best dispensary deals"
-            },
-            {
-              "title": "favorites",
-              "description": "View your saved strain favorites"
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "composeExtensions": [
-    {
-      "botId": "${{BOT_ID}}",
-      "commands": [
-        {
-          "id": "searchStrains",
-          "type": "query",
-          "title": "Search Strains",
-          "description": "Find and share cannabis strain information",
-          "context": ["compose", "commandBox"],
-          "parameters": [
-            {
-              "name": "query",
-              "title": "Strain name or effect",
-              "description": "Enter strain name, type (indica/sativa), or desired effect",
-              "inputType": "text"
-            }
-          ],
-          "initialRun": true
-        }
-      ]
-    }
-  ],
-  "staticTabs": [
-    {
-      "entityId": "terprintDashboard",
-      "name": "My Strains",
-      "contentUrl": "https://portal.terprint.net/teams/dashboard?context={loginHint}&theme={theme}",
-      "websiteUrl": "https://portal.terprint.net/dashboard",
-      "scopes": ["personal"]
-    },
-    {
-      "entityId": "terprintDeals",
-      "name": "Deals",
-      "contentUrl": "https://portal.terprint.net/teams/deals?context={loginHint}&theme={theme}",
-      "websiteUrl": "https://portal.terprint.net/deals",
-      "scopes": ["personal"]
-    }
-  ],
   "permissions": [
-    "identity",
-    "messageTeamMembers"
+    "identity"
   ],
   "validDomains": [
     "${{APIM_DOMAIN}}",
-    "terprint.acidni.net",
-    "portal.terprint.net"
+    "terprint.acidni.net"
   ]
 }

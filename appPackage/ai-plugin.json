@@ -375,8 +375,7 @@
     {
       "type": "OpenApi",
       "auth": {
-        "type": "OAuthPluginVault",
-        "reference_id": "${{OAUTH_CONNECTION_ID}}"
+        "type": "None"
       },
       "spec": {
         "url": "apiSpecificationFile/openapi.json"

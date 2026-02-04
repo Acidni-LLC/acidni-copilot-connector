@@ -12,20 +12,6 @@
     }
   ],
   "components": {
-    "securitySchemes": {
-      "OAuth2": {
-        "type": "oauth2",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://login.microsoftonline.com/${{AAD_APP_TENANT_ID}}/oauth2/v2.0/authorize",
-            "tokenUrl": "https://login.microsoftonline.com/${{AAD_APP_TENANT_ID}}/oauth2/v2.0/token",
-            "scopes": {
-              "api://${{AAD_APP_CLIENT_ID}}/Terprint.Access": "Access Terprint API on behalf of the user"
-            }
-          }
-        }
-      }
-    },
     "schemas": {
       "ChatRequest": {
         "type": "object",
@@ -121,11 +107,6 @@
       }
     }
   },
-  "security": [
-    {
-      "OAuth2": ["api://${{AAD_APP_CLIENT_ID}}/Terprint.Access"]
-    }
-  ],
   "paths": {
     "/chat/query": {
       "post": {
