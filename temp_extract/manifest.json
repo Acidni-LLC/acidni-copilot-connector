@@ -1,0 +1,43 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
+    "manifestVersion": "devPreview",
+    "version": "4.3.0",
+    "id": "1e001056-95df-4bc8-8321-6da22c409ca6",
+    "developer": {
+        "name": "Acidni LLC",
+        "websiteUrl": "https://www.acidni.net",
+        "privacyUrl": "https://www.acidni.net/privacy",
+        "termsOfUseUrl": "https://www.acidni.net/terms"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Terprint AI",
+        "full": "Terprint AI - Cannabis Intelligence for Florida MMJ Patients"
+    },
+    "description": {
+        "short": "Florida cannabis strain intelligence - strains, deals & recommendations.",
+        "full": "Terprint AI brings comprehensive cannabis intelligence directly into Microsoft 365 Copilot and Teams.\n\n **Strain Database**\nSearch 5,000+ cannabis strains with lab-verified terpene and cannabinoid profiles.\n\n **Personalized Recommendations**\nReceive AI-powered strain suggestions based on your desired effects.\n\n **Real-Time Deal Finder**\nCompare prices across all Florida dispensaries in real-time.\n\n **Dispensary Locator**\nFind nearby Medical Marijuana Treatment Centers (MMTCs)."
+    },
+    "accentColor": "#10B981",
+    "localizationInfo": {
+        "defaultLanguageTag": "en-us"
+    },
+    "copilotAgents": {
+        "declarativeAgents": [
+            {
+                "id": "terprintAgent",
+                "file": "declarativeAgent.json"
+            }
+        ]
+    },
+    "permissions": [
+        "identity"
+    ],
+    "validDomains": [
+        "apim-terprint-dev.azure-api.net",
+        "terprint.acidni.net"
+    ]
+}

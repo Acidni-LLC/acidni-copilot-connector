@@ -1,6 +1,6 @@
 {
   "name": "acidni-copilot-connector",
-  "version": "3.10.0",
+  "version": "4.6.1",
   "description": "Microsoft 365 Copilot plugin for Terprint AI cannabis analytics services",
   "main": "index.js",
   "scripts": {
