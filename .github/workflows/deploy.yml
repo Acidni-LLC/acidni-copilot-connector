@@ -1,0 +1,120 @@
+name: Deploy to M365
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  TEAMS_APP_TENANT_ID: ${{ secrets.TEAMS_APP_TENANT_ID }}
+  TEAMS_APP_ID: ${{ secrets.TEAMS_APP_ID }}
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate manifest
+        run: npm run validate
+
+      - name: Validate JSON schemas
+        run: npm run validate:schemas
+
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' || github.event.inputs.environment == 'dev'
+    environment: dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Teams Toolkit CLI
+        run: npm install -g @microsoft/teamsapp-cli
+
+      - name: Create env file
+        run: |
+          mkdir -p env
+          cat > env/.env.dev << EOF
+          TEAMS_APP_ID=${{ secrets.TEAMS_APP_ID }}
+          TEAMS_APP_TENANT_ID=${{ secrets.TEAMS_APP_TENANT_ID }}
+          TERPRINT_API_KEY_REGISTRATION_ID=${{ secrets.TERPRINT_API_KEY_REGISTRATION_ID }}
+          EOF
+
+      - name: Provision Teams App
+        run: teamsapp provision --env dev
+        env:
+          M365_ACCOUNT_NAME: ${{ secrets.M365_ACCOUNT_NAME }}
+          M365_ACCOUNT_PASSWORD: ${{ secrets.M365_ACCOUNT_PASSWORD }}
+          M365_TENANT_ID: ${{ secrets.TEAMS_APP_TENANT_ID }}
+          CI: true
+
+      - name: Publish to Tenant Catalog
+        run: teamsapp publish --env dev
+        env:
+          M365_ACCOUNT_NAME: ${{ secrets.M365_ACCOUNT_NAME }}
+          M365_ACCOUNT_PASSWORD: ${{ secrets.M365_ACCOUNT_PASSWORD }}
+          M365_TENANT_ID: ${{ secrets.TEAMS_APP_TENANT_ID }}
+          CI: true
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appPackage-dev
+          path: appPackage/build/
+          if-no-files-found: warn
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    if: always()
+    steps:
+      - name: Get version from manifest
+        if: needs.deploy-dev.result == 'success'
+        run: |
+          echo "## ✅ Terprint AI Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Successfully deployed to dev tenant." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Actor:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify failure
+        if: needs.deploy-dev.result == 'failure'
+        run: |
+          echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs for details." >> $GITHUB_STEP_SUMMARY

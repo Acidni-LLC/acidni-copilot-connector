@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Terprint Cannabis Intelligence API
   description: Comprehensive cannabis intelligence API providing strain data, personalized recommendations, deal search, and dispensary locations for Florida medical marijuana patients.
-  version: 4.7.0
+  version: 4.8.1
 host: apim-terprint-dev.azure-api.net
 basePath: /
 schemes:
@@ -40,7 +40,8 @@ definitions:
         type: array
         items:
           type: string
-        description: Data sources used
+          description: Individual data source name or URL
+        description: Data sources used to generate the response
       suggested_actions:
         type: array
         items:
@@ -48,9 +49,11 @@ definitions:
           properties:
             label:
               type: string
+              description: Display text for the suggested action button
             action:
               type: string
-        description: Suggested follow-up actions
+              description: Action identifier or URL to execute when clicked
+        description: Suggested follow-up actions for the user
       session_id:
         type: string
         description: Session identifier
@@ -83,14 +86,17 @@ definitions:
         description: THC/CBD percentages
       metadata:
         type: object
+        description: Additional strain metadata and details
         properties:
           description:
             type: string
+            description: Detailed description of the strain's characteristics and effects
   Recommendation:
     type: object
     properties:
       strain:
         $ref: '#/definitions/Strain'
+        description: The recommended cannabis strain with full details
       match_score:
         type: number
         description: Recommendation match score (0-100)
@@ -98,7 +104,8 @@ definitions:
         type: array
         items:
           type: string
-        description: Why this strain was recommended
+          description: Individual reason explaining why this strain matches
+        description: List of reasons why this strain was recommended
   Deal:
     type: object
     properties:
@@ -142,7 +149,8 @@ definitions:
         type: array
         items:
           type: string
-        description: Promotion names
+          description: Name of a promotion or discount applied to this deal
+        description: Promotion names applied to this deal
   Dispensary:
     type: object
     properties:
@@ -178,7 +186,17 @@ definitions:
         description: Longitude
       navigation:
         type: object
-        description: Navigation links (Google Maps, Apple Maps, Waze)
+        description: Navigation links for directions to the dispensary
+        properties:
+          google_maps:
+            type: string
+            description: Google Maps directions URL
+          apple_maps:
+            type: string
+            description: Apple Maps directions URL
+          waze:
+            type: string
+            description: Waze directions URL
   PaginationMeta:
     type: object
     properties:
@@ -194,6 +212,67 @@ definitions:
       has_more:
         type: boolean
         description: More results available
+  TerpeneEntry:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Terpene name (e.g., d-Limonene, beta-Myrcene, Linalool)
+      percentage:
+        type: number
+        description: Terpene percentage in the batch
+  CannabinoidEntry:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Cannabinoid name (e.g., THC, CBD, CBG, CBN)
+      percentage:
+        type: number
+        description: Cannabinoid percentage in the batch
+  Batch:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Batch identifier
+      batchNumber:
+        type: string
+        description: Unique batch number from lab testing
+      strainName:
+        type: string
+        description: Strain name for this batch
+      strainType:
+        type: string
+        description: Product type (Flower, Vape, Concentrate, etc.)
+      dispensary:
+        type: string
+        description: Dispensary brand (Trulieve, Surterra, Curaleaf, etc.)
+      THC:
+        type: string
+        description: THC percentage
+      CBD:
+        type: number
+        description: CBD percentage
+      totalTerpenes:
+        type: string
+        description: Total terpene percentage
+      batchDate:
+        type: string
+        description: Lab test date (YYYY-MM-DD)
+      createdAt:
+        type: string
+        description: Record creation timestamp
+      terpene_profile:
+        type: array
+        items:
+          $ref: '#/definitions/TerpeneEntry'
+        description: Individual terpene percentages from lab testing
+      cannabinoid_profile:
+        type: array
+        items:
+          $ref: '#/definitions/CannabinoidEntry'
+        description: Individual cannabinoid percentages from lab testing
 paths:
   /copilot/chat:
     post:
@@ -258,8 +337,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Strain'
+                description: Array of cannabis strains matching the search criteria
               meta:
                 $ref: '#/definitions/PaginationMeta'
+                description: Pagination information for the results
   /copilot/deals:
     get:
       operationId: searchDeals
@@ -326,10 +407,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Deal'
+                description: List of cannabis deals matching the search criteria
               total_count:
                 type: integer
+                description: Total number of deals found
               search_location:
                 type: string
+                description: Location used for the deal search
   /copilot/locations:
     get:
       operationId: findDispensaries
@@ -378,8 +462,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Dispensary'
+                description: List of dispensaries near the specified location
               total_count:
                 type: integer
+                description: Total number of dispensaries found
   /copilot/recommendations:
     get:
       operationId: getRecommendations
@@ -435,6 +521,62 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Recommendation'
+                description: List of personalized strain recommendations with match scores
               criteria_summary:
                 type: string
                 description: Summary of the criteria used for recommendations
+  /copilot/batches:
+    get:
+      operationId: searchBatches
+      summary: Search cannabis batch lab test results
+      description: Search for detailed lab test results including THC/CBD percentages, individual terpene profiles, and cannabinoid breakdowns. Each batch represents a specific lot of product with verified lab testing data.
+      parameters:
+        - name: strain_name
+          in: query
+          type: string
+          description: Filter by strain name (partial match supported)
+        - name: dispensary
+          in: query
+          type: string
+          description: Filter by dispensary brand (Trulieve, Surterra, Curaleaf, etc.)
+        - name: strain_type
+          in: query
+          type: string
+          description: Filter by product type (Flower, Vape, Concentrate, etc.)
+        - name: min_thc
+          in: query
+          type: number
+          description: Minimum THC percentage
+        - name: min_terpenes
+          in: query
+          type: number
+          description: Minimum total terpene percentage
+        - name: terpene
+          in: query
+          type: string
+          description: Filter by dominant terpene (Limonene, Myrcene, Caryophyllene, Linalool, Pinene)
+        - name: limit
+          in: query
+          type: integer
+          default: 20
+          maximum: 50
+          description: Maximum batches to return (default 20)
+        - name: offset
+          in: query
+          type: integer
+          default: 0
+          description: Pagination offset
+      responses:
+        '200':
+          description: List of batch lab test results
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Batch'
+                description: Array of batch lab test results
+              pagination:
+                $ref: '#/definitions/PaginationMeta'
+                description: Pagination information for the results

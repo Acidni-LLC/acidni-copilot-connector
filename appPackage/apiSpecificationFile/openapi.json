@@ -3,7 +3,7 @@
   "info": {
     "title": "Terprint Cannabis Intelligence API",
     "description": "Comprehensive cannabis intelligence API providing strain data, personalized recommendations, deal search, and dispensary locations for Florida medical marijuana patients.",
-    "version": "4.7.0"
+    "version": "4.8.0"
   },
   "servers": [
     {
@@ -272,6 +272,91 @@
           "has_more": {
             "type": "boolean",
             "description": "More results available"
+          }
+        }
+      },
+      "TerpeneEntry": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Terpene name (e.g., d-Limonene, beta-Myrcene, Linalool)"
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Terpene percentage in the batch"
+          }
+        }
+      },
+      "CannabinoidEntry": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Cannabinoid name (e.g., THC, CBD, CBG, CBN)"
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Cannabinoid percentage in the batch"
+          }
+        }
+      },
+      "Batch": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Batch identifier"
+          },
+          "batchNumber": {
+            "type": "string",
+            "description": "Unique batch number from lab testing"
+          },
+          "strainName": {
+            "type": "string",
+            "description": "Strain name for this batch"
+          },
+          "strainType": {
+            "type": "string",
+            "description": "Product type (Flower, Vape, Concentrate, etc.)"
+          },
+          "dispensary": {
+            "type": "string",
+            "description": "Dispensary brand (Trulieve, Surterra, Curaleaf, etc.)"
+          },
+          "THC": {
+            "type": "string",
+            "description": "THC percentage"
+          },
+          "CBD": {
+            "type": "number",
+            "description": "CBD percentage"
+          },
+          "totalTerpenes": {
+            "type": "string",
+            "description": "Total terpene percentage"
+          },
+          "batchDate": {
+            "type": "string",
+            "description": "Lab test date (YYYY-MM-DD)"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Record creation timestamp"
+          },
+          "terpene_profile": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TerpeneEntry"
+            },
+            "description": "Individual terpene percentages from lab testing"
+          },
+          "cannabinoid_profile": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CannabinoidEntry"
+            },
+            "description": "Individual cannabinoid percentages from lab testing"
           }
         }
       }

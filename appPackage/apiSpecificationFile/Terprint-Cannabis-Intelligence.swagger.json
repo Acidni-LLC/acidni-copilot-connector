@@ -1,0 +1,697 @@
+{
+  "swagger": "2.0",
+  "host": "apim-terprint-dev.azure-api.net",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "Ocp-Apim-Subscription-Key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "ChatRequest": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "User's question about cannabis"
+        }
+      }
+    },
+    "ChatResponse": {
+      "type": "object",
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "description": "Unique message identifier"
+        },
+        "response": {
+          "type": "string",
+          "description": "AI-generated response"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Data sources used"
+        },
+        "suggested_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Suggested follow-up actions"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Session identifier"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Response confidence score"
+        },
+        "tokens_used": {
+          "type": "integer",
+          "description": "Tokens consumed"
+        }
+      }
+    },
+    "Strain": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique strain identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Strain name"
+        },
+        "strain_type": {
+          "type": "string",
+          "description": "Product type (Flower, Vape, Concentrate, etc.)"
+        },
+        "genetics": {
+          "type": "string",
+          "description": "Strain genetics/lineage"
+        },
+        "terpene_profile": {
+          "type": "object",
+          "description": "Terpene percentages"
+        },
+        "cannabinoid_profile": {
+          "type": "object",
+          "description": "THC/CBD percentages"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "Recommendation": {
+      "type": "object",
+      "properties": {
+        "strain": {
+          "$ref": "#/definitions/Strain"
+        },
+        "match_score": {
+          "type": "number",
+          "description": "Recommendation match score (0-100)"
+        },
+        "match_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Why this strain was recommended"
+        }
+      }
+    },
+    "Deal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Deal identifier"
+        },
+        "strain_name": {
+          "type": "string",
+          "description": "Strain name"
+        },
+        "dispensary": {
+          "type": "string",
+          "description": "Dispensary slug"
+        },
+        "brand": {
+          "type": "string",
+          "description": "Dispensary brand name"
+        },
+        "category": {
+          "type": "string",
+          "description": "Product category (Flower, Vape, etc.)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Deal description"
+        },
+        "original_price": {
+          "type": "number",
+          "description": "Original price in USD"
+        },
+        "sale_price": {
+          "type": "number",
+          "description": "Sale price in USD"
+        },
+        "discount_percent": {
+          "type": "number",
+          "description": "Discount percentage"
+        },
+        "weight_grams": {
+          "type": "number",
+          "description": "Product weight in grams"
+        },
+        "thc_percent": {
+          "type": "number",
+          "description": "THC percentage if known"
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Product image URL"
+        },
+        "promo_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Promotion names"
+        }
+      }
+    },
+    "Dispensary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Location identifier"
+        },
+        "dispensaryId": {
+          "type": "integer",
+          "description": "Dispensary chain ID"
+        },
+        "dispensaryName": {
+          "type": "string",
+          "description": "Dispensary name"
+        },
+        "company": {
+          "type": "string",
+          "description": "Parent company"
+        },
+        "address": {
+          "type": "string",
+          "description": "Street address"
+        },
+        "city": {
+          "type": "string",
+          "description": "City"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "ZIP code"
+        },
+        "county": {
+          "type": "string",
+          "description": "County"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude"
+        },
+        "navigation": {
+          "type": "object",
+          "description": "Navigation links (Google Maps, Apple Maps, Waze)"
+        }
+      }
+    },
+    "PaginationMeta": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total results"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Results per page"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Current offset"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "More results available"
+        }
+      }
+    }
+  },
+  "x-ms-openai-manifest": {
+    "humanName": "Terprint Cannabis Intelligence",
+    "modelDescription": "Comprehensive cannabis intelligence API providing strain data, personalized recommendations, deal search, and dispensary locations for Florida medical marijuana patients.",
+    "contactEmail": "",
+    "legalUrl": ""
+  },
+  "info": {
+    "title": "Terprint Cannabis Intelligence",
+    "description": "Comprehensive cannabis intelligence API providing strain data, personalized recommendations, deal search, and dispensary locations for Florida medical marijuana patients.",
+    "version": "4.7.0"
+  },
+  "paths": {
+    "/copilot/chat": {
+      "post": {
+        "operationId": "chatWithTerprint",
+        "summary": "Have a natural language conversation about cannabis",
+        "description": "Ask open-ended questions about cannabis strains, effects, terpenes, medical uses, and industry information. The AI provides accurate, educational responses based on Terprint's cannabis database.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChatRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI-generated response to the cannabis question",
+            "schema": {
+              "$ref": "#/definitions/ChatResponse"
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "chatWithTerprint",
+              "x-ms-require-user-confirmation": false,
+              "summary": "Have a natural language conversation about cannabis",
+              "description": "Ask open-ended questions about cannabis strains, effects, terpenes, medical uses, and industry information. The AI provides accurate, educational responses based on Terprint's cannabis database."
+            }
+          ]
+        }
+      }
+    },
+    "/copilot/strains": {
+      "get": {
+        "operationId": "getStrains",
+        "summary": "Search and browse cannabis strains",
+        "description": "Search cannabis strains by name, type (indica/sativa/hybrid), or characteristics. Returns detailed strain information including THC/CBD levels, terpene profiles, effects, and flavors.",
+        "parameters": [
+          {
+            "name": "strain_name",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by strain name (partial match). Optional - omit to browse all strains. Examples - Blue Dream, OG, Gelato"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "indica",
+              "sativa",
+              "hybrid"
+            ],
+            "description": "Filter by cannabis type - indica (relaxing), sativa (energizing), hybrid (balanced)"
+          },
+          {
+            "name": "effect",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by desired effect - relaxed, euphoric, creative, focused, sleepy, hungry"
+          },
+          {
+            "name": "terpene",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by dominant terpene - myrcene, limonene, caryophyllene, pinene, linalool"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 25,
+            "maximum": 100,
+            "description": "Maximum results (1-100, default 25)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Pagination offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cannabis strains matching criteria",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Strain"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/PaginationMeta"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "getStrains",
+              "x-ms-require-user-confirmation": false,
+              "summary": "Search and browse cannabis strains",
+              "description": "Search cannabis strains by name, type (indica/sativa/hybrid), or characteristics. Returns detailed strain information including THC/CBD levels, terpene profiles, effects, and flavors."
+            }
+          ]
+        }
+      }
+    },
+    "/copilot/deals": {
+      "get": {
+        "operationId": "searchDeals",
+        "summary": "Find cannabis deals and prices at Florida dispensaries",
+        "description": "Search for the best prices, discounts, and promotions on cannabis products at Florida medical marijuana dispensaries.",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "type": "string",
+            "description": "City to search near (Orlando, Tampa, Miami, Jacksonville)"
+          },
+          {
+            "name": "zip",
+            "in": "query",
+            "type": "string",
+            "description": "ZIP code to search near"
+          },
+          {
+            "name": "dispensary_name",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by dispensary (Trulieve, Surterra, Curaleaf)"
+          },
+          {
+            "name": "product_type",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "flower",
+              "vape",
+              "concentrate",
+              "edible",
+              "topical",
+              "tincture"
+            ],
+            "description": "Product category"
+          },
+          {
+            "name": "strain_name",
+            "in": "query",
+            "type": "string",
+            "description": "Filter deals for a specific strain"
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "type": "number",
+            "description": "Maximum price in USD"
+          },
+          {
+            "name": "min_discount",
+            "in": "query",
+            "type": "number",
+            "description": "Minimum discount percentage"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "price_low",
+              "price_high",
+              "discount",
+              "newest"
+            ],
+            "description": "Sort order"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "maximum": 50,
+            "description": "Maximum deals to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of deals matching search criteria",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deals": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Deal"
+                  }
+                },
+                "total_count": {
+                  "type": "integer"
+                },
+                "search_location": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "searchDeals",
+              "x-ms-require-user-confirmation": false,
+              "summary": "Find cannabis deals and prices at Florida dispensaries",
+              "description": "Search for the best prices, discounts, and promotions on cannabis products at Florida medical marijuana dispensaries."
+            }
+          ]
+        }
+      }
+    },
+    "/copilot/locations": {
+      "get": {
+        "operationId": "findDispensaries",
+        "summary": "Find medical marijuana dispensaries in Florida",
+        "description": "Locate licensed medical marijuana dispensaries near a city, ZIP code, or address in Florida. Returns dispensary details including address, hours, phone, and distance.",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "type": "string",
+            "description": "City to search near (Orlando, Tampa, Miami, Jacksonville)"
+          },
+          {
+            "name": "zip",
+            "in": "query",
+            "type": "string",
+            "description": "ZIP code to search near"
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by brand - Trulieve, Surterra, Curaleaf, Fluent, MUV, VidaCann"
+          },
+          {
+            "name": "radius_miles",
+            "in": "query",
+            "type": "integer",
+            "default": 25,
+            "maximum": 100,
+            "description": "Search radius in miles (default 25)"
+          },
+          {
+            "name": "open_now",
+            "in": "query",
+            "type": "boolean",
+            "description": "Filter to currently open dispensaries"
+          },
+          {
+            "name": "has_delivery",
+            "in": "query",
+            "type": "boolean",
+            "description": "Filter to dispensaries offering delivery"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "maximum": 50,
+            "description": "Maximum dispensaries to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of dispensaries near the location",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "dispensaries": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Dispensary"
+                  }
+                },
+                "total_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "findDispensaries",
+              "x-ms-require-user-confirmation": false,
+              "summary": "Find medical marijuana dispensaries in Florida",
+              "description": "Locate licensed medical marijuana dispensaries near a city, ZIP code, or address in Florida. Returns dispensary details including address, hours, phone, and distance."
+            }
+          ]
+        }
+      }
+    },
+    "/copilot/recommendations": {
+      "get": {
+        "operationId": "getRecommendations",
+        "summary": "Get personalized cannabis strain recommendations",
+        "description": "Get AI-powered strain recommendations based on desired effects, medical conditions, flavor preferences, or experience level. The recommendation engine analyzes terpene profiles and user preferences to suggest optimal strains.",
+        "parameters": [
+          {
+            "name": "effects",
+            "in": "query",
+            "type": "string",
+            "description": "Desired effects (comma-separated) - relaxed, euphoric, creative, focused, sleepy, energetic, happy, hungry"
+          },
+          {
+            "name": "conditions",
+            "in": "query",
+            "type": "string",
+            "description": "Medical conditions to address - anxiety, pain, insomnia, depression, nausea, inflammation"
+          },
+          {
+            "name": "flavors",
+            "in": "query",
+            "type": "string",
+            "description": "Preferred flavors (comma-separated) - citrus, earthy, sweet, pine, berry, diesel, tropical"
+          },
+          {
+            "name": "avoid_effects",
+            "in": "query",
+            "type": "string",
+            "description": "Effects to avoid - paranoia, anxiety, dry_mouth, dizzy"
+          },
+          {
+            "name": "experience_level",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "experienced"
+            ],
+            "description": "User cannabis experience level for appropriate potency recommendations"
+          },
+          {
+            "name": "type_preference",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "indica",
+              "sativa",
+              "hybrid",
+              "any"
+            ],
+            "description": "Preferred cannabis type"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 5,
+            "maximum": 20,
+            "description": "Number of recommendations to return (default 5)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Personalized strain recommendations with match scores",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recommendations": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Recommendation"
+                  }
+                },
+                "criteria_summary": {
+                  "type": "string",
+                  "description": "Summary of the criteria used for recommendations"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "getRecommendations",
+              "x-ms-require-user-confirmation": false,
+              "summary": "Get personalized cannabis strain recommendations",
+              "description": "Get AI-powered strain recommendations based on desired effects, medical conditions, flavor preferences, or experience level. The recommendation engine analyzes terpene profiles and user preferences to suggest optimal strains."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

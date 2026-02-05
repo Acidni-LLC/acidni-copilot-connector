@@ -4,7 +4,7 @@
   "name_for_human": "Terprint AI",
   "description_for_human": "Your cannabis intelligence assistant - strains, recommendations, deals, and dispensary locations for Florida medical marijuana patients.",
   "namespace": "terprint",
-  "description_for_model": "Terprint AI v4.7.0 - Cannabis intelligence for Florida medical marijuana patients.\n\nAvailable capabilities:\n- chatWithTerprint: Answer open-ended cannabis questions about strains, terpenes, effects, and medical uses\n- getStrains: Search and browse cannabis strains by name, type, effects, or terpenes\n- getRecommendations: Get personalized strain suggestions based on desired effects or activities\n- searchDeals: Find the best prices and promotions at Florida dispensaries\n- findDispensaries: Locate medical marijuana dispensaries by city or ZIP code\n\nUsage guidance:\n- Use chatWithTerprint for general educational questions\n- Use getStrains when users want to browse or search specific strains\n- Use getRecommendations when users describe what they're looking for (effects, symptoms, activities)\n- Use searchDeals before recommending purchases to show current pricing\n- Use findDispensaries when users mention location or ask where to buy",
+  "description_for_model": "Terprint AI v5.0.0 - Cannabis intelligence for Florida medical marijuana patients (using Power Platform verified spec).\n\nAvailable capabilities:\n- chatWithTerprint: Answer open-ended cannabis questions about strains, terpenes, effects, and medical uses\n- getStrains: Search and browse cannabis strains by name, type, effects, or terpenes\n- getRecommendations: Get personalized strain suggestions based on desired effects or activities\n- searchDeals: Find the best prices and promotions at Florida dispensaries\n- findDispensaries: Locate medical marijuana dispensaries by city or ZIP code\n\nUsage guidance:\n- Use chatWithTerprint for general educational questions\n- Use getStrains when users want to browse or search specific strains\n- Use getRecommendations when users describe what they're looking for (effects, symptoms, activities)\n- Use searchDeals before recommending purchases to show current pricing\n- Use findDispensaries when users mention location or ask where to buy",
   "functions": [
     {
       "name": "chatWithTerprint",
@@ -367,7 +367,7 @@
         "reference_id": "${{TERPRINT_API_KEY_REGISTRATION_ID}}"
       },
       "spec": {
-        "url": "apiSpecificationFile/openapi.json"
+        "url": "apiSpecificationFile/Terprint-Cannabis-Intelligence.swagger.json"
       },
       "run_for_functions": ["chatWithTerprint", "getStrains", "getRecommendations", "searchDeals", "findDispensaries"]
     }
