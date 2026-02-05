@@ -6,7 +6,7 @@
     "https"
   ],
   "securityDefinitions": {
-    "api_key": {
+    "apiKey": {
       "type": "apiKey",
       "name": "Ocp-Apim-Subscription-Key",
       "in": "header"
@@ -14,7 +14,7 @@
   },
   "security": [
     {
-      "api_key": []
+      "apiKey": []
     }
   ],
   "consumes": [
