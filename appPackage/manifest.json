@@ -1,7 +1,7 @@
-﻿{
+{
   "$schema": "https://developer.microsoft.com/json-schemas/teams/vDevPreview/MicrosoftTeams.schema.json",
   "manifestVersion": "devPreview",
-  "version": "3.20.0",
+  "version": "4.6.0",
   "id": "${{TEAMS_APP_ID}}",
   "developer": {
     "name": "Acidni LLC",
@@ -38,6 +38,7 @@
   ],
   "validDomains": [
     "${{APIM_DOMAIN}}",
-    "terprint.acidni.net"
+    "terprint.acidni.net",
+    "6n2dq3jv-3000.usw3.devtunnels.ms"
   ]
 }

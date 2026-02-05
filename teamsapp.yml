@@ -12,6 +12,16 @@ provision:
     writeToEnvironmentFile:
       teamsAppId: TEAMS_APP_ID
 
+  # Register APIM subscription key for Copilot to use
+  - uses: apiKey/register
+    with:
+      name: apiKey
+      appId: ${{TEAMS_APP_ID}}
+      primaryClientSecret: ${{APIM_SUBSCRIPTION_KEY}}
+      apiSpecPath: ./appPackage/apiSpecificationFile/openapi.json
+    writeToEnvironmentFile:
+      registrationId: TERPRINT_API_KEY_REGISTRATION_ID
+  
   - uses: teamsApp/zipAppPackage
     with:
       manifestPath: ./appPackage/manifest.json

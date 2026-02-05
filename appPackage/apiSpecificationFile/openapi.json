@@ -3,21 +3,29 @@
   "info": {
     "title": "Terprint Cannabis Intelligence API",
     "description": "Comprehensive cannabis intelligence API providing strain data, personalized recommendations, deal search, and dispensary locations for Florida medical marijuana patients.",
-    "version": "3.15.0"
+    "version": "4.6.0-DEBUG"
   },
   "servers": [
     {
-      "url": "https://apim-terprint-dev.azure-api.net",
-      "description": "Azure APIM - Terprint Services"
+      "url": "https://6n2dq3jv-3000.usw3.devtunnels.ms",
+      "description": "LOCAL MOCK SERVER - Debug tunnel"
     }
   ],
   "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Ocp-Apim-Subscription-Key",
+        "description": "Azure APIM subscription key"
+      }
+    },
     "schemas": {
       "ChatRequest": {
         "type": "object",
-        "required": ["query"],
+        "required": ["message"],
         "properties": {
-          "query": {
+          "message": {
             "type": "string",
             "description": "User's question about cannabis"
           }
@@ -47,13 +55,11 @@
         "properties": {
           "id": { "type": "string", "description": "Unique strain identifier" },
           "name": { "type": "string", "description": "Strain name" },
-          "type": { "type": "string", "enum": ["indica", "sativa", "hybrid"], "description": "Cannabis type" },
-          "description": { "type": "string", "description": "Strain description and effects" },
-          "thc_avg": { "type": "number", "description": "Average THC percentage" },
-          "cbd_avg": { "type": "number", "description": "Average CBD percentage" },
-          "dominant_terpene": { "type": "string", "description": "Most abundant terpene" },
-          "effects": { "type": "array", "items": { "type": "string" }, "description": "Common effects" },
-          "flavors": { "type": "array", "items": { "type": "string" }, "description": "Flavor profile" }
+          "strain_type": { "type": "string", "description": "Product type (Flower, Vape, Concentrate, etc.)" },
+          "genetics": { "type": "string", "description": "Strain genetics/lineage" },
+          "terpene_profile": { "type": "object", "description": "Terpene percentages" },
+          "cannabinoid_profile": { "type": "object", "description": "THC/CBD percentages" },
+          "metadata": { "type": "object", "properties": { "description": { "type": "string" } } }
         }
       },
       "Recommendation": {
@@ -68,32 +74,34 @@
         "type": "object",
         "properties": {
           "id": { "type": "string", "description": "Deal identifier" },
-          "title": { "type": "string", "description": "Deal title" },
-          "description": { "type": "string", "description": "Deal details" },
-          "dispensary_name": { "type": "string", "description": "Dispensary offering the deal" },
-          "product_type": { "type": "string", "description": "Product category" },
+          "strain_name": { "type": "string", "description": "Strain name" },
+          "dispensary": { "type": "string", "description": "Dispensary slug" },
+          "brand": { "type": "string", "description": "Dispensary brand name" },
+          "category": { "type": "string", "description": "Product category (Flower, Vape, etc.)" },
+          "description": { "type": "string", "description": "Deal description" },
           "original_price": { "type": "number", "description": "Original price in USD" },
           "sale_price": { "type": "number", "description": "Sale price in USD" },
           "discount_percent": { "type": "number", "description": "Discount percentage" },
-          "valid_until": { "type": "string", "format": "date-time", "description": "Deal expiration" },
-          "strain_name": { "type": "string", "description": "Associated strain if applicable" }
+          "weight_grams": { "type": "number", "description": "Product weight in grams" },
+          "thc_percent": { "type": "number", "description": "THC percentage if known" },
+          "image_url": { "type": "string", "description": "Product image URL" },
+          "promo_names": { "type": "array", "items": { "type": "string" }, "description": "Promotion names" }
         }
       },
       "Dispensary": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "description": "Dispensary identifier" },
-          "name": { "type": "string", "description": "Dispensary name" },
-          "brand": { "type": "string", "description": "Parent brand/company" },
+          "id": { "type": "integer", "description": "Location identifier" },
+          "dispensaryId": { "type": "integer", "description": "Dispensary chain ID" },
+          "dispensaryName": { "type": "string", "description": "Dispensary name" },
+          "company": { "type": "string", "description": "Parent company" },
           "address": { "type": "string", "description": "Street address" },
           "city": { "type": "string", "description": "City" },
-          "state": { "type": "string", "description": "State" },
-          "zip": { "type": "string", "description": "ZIP code" },
-          "phone": { "type": "string", "description": "Phone number" },
+          "zipCode": { "type": "string", "description": "ZIP code" },
+          "county": { "type": "string", "description": "County" },
           "latitude": { "type": "number", "description": "Latitude" },
           "longitude": { "type": "number", "description": "Longitude" },
-          "hours": { "type": "string", "description": "Operating hours" },
-          "distance_miles": { "type": "number", "description": "Distance from search location" }
+          "navigation": { "type": "object", "description": "Navigation links (Google Maps, Apple Maps, Waze)" }
         }
       },
       "PaginationMeta": {
@@ -108,7 +116,7 @@
     }
   },
   "paths": {
-    "/chat/query": {
+    "/copilot/chat": {
       "post": {
         "operationId": "chatWithTerprint",
         "summary": "Have a natural language conversation about cannabis",
@@ -133,7 +141,7 @@
         }
       }
     },
-    "/data/v2/strains": {
+    "/copilot/strains": {
       "get": {
         "operationId": "getStrains",
         "summary": "Search and browse cannabis strains",
@@ -197,77 +205,7 @@
         }
       }
     },
-    "/recommend/strains": {
-      "get": {
-        "operationId": "getRecommendations",
-        "summary": "Get personalized cannabis strain recommendations",
-        "description": "Receive AI-powered strain recommendations based on desired effects, symptoms, or activities. The engine considers terpene profiles and cannabinoid ratios to suggest optimal strains.",
-        "parameters": [
-          {
-            "name": "effects",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Desired effects (comma-separated): relaxation, focus, creativity, energy, sleep, pain_relief, anxiety_relief"
-          },
-          {
-            "name": "avoid_effects",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Effects to avoid (comma-separated): anxiety, paranoia, drowsiness"
-          },
-          {
-            "name": "activity",
-            "in": "query",
-            "schema": { "type": "string" },
-            "description": "Intended activity: work, social, exercise, creative_project, relaxing, sleeping"
-          },
-          {
-            "name": "experience_level",
-            "in": "query",
-            "schema": { "type": "string", "enum": ["beginner", "intermediate", "experienced"] },
-            "description": "Cannabis experience level"
-          },
-          {
-            "name": "preferred_type",
-            "in": "query",
-            "schema": { "type": "string", "enum": ["indica", "sativa", "hybrid", "any"] },
-            "description": "Preferred cannabis type"
-          },
-          {
-            "name": "time_of_day",
-            "in": "query",
-            "schema": { "type": "string", "enum": ["morning", "afternoon", "evening", "night"] },
-            "description": "When the strain will be used"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": { "type": "integer", "default": 5, "maximum": 20 },
-            "description": "Number of recommendations (default 5)"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Personalized strain recommendations with match scores",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "recommendations": {
-                      "type": "array",
-                      "items": { "$ref": "#/components/schemas/Recommendation" }
-                    },
-                    "query_summary": { "type": "string", "description": "Summary of criteria used" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/deals/search": {
+    "/copilot/deals": {
       "get": {
         "operationId": "searchDeals",
         "summary": "Find cannabis deals and prices at Florida dispensaries",
@@ -350,7 +288,7 @@
         }
       }
     },
-    "/data/api/locations": {
+    "/copilot/locations": {
       "get": {
         "operationId": "findDispensaries",
         "summary": "Find medical marijuana dispensaries in Florida",
@@ -419,6 +357,84 @@
           }
         }
       }
+    },
+    "/copilot/recommendations": {
+      "get": {
+        "operationId": "getRecommendations",
+        "summary": "Get personalized cannabis strain recommendations",
+        "description": "Get AI-powered strain recommendations based on desired effects, medical conditions, flavor preferences, or experience level. The recommendation engine analyzes terpene profiles and user preferences to suggest optimal strains.",
+        "parameters": [
+          {
+            "name": "effects",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Desired effects (comma-separated): relaxed, euphoric, creative, focused, sleepy, energetic, happy, hungry"
+          },
+          {
+            "name": "conditions",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Medical conditions to address: anxiety, pain, insomnia, depression, nausea, inflammation"
+          },
+          {
+            "name": "flavors",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Preferred flavors (comma-separated): citrus, earthy, sweet, pine, berry, diesel, tropical"
+          },
+          {
+            "name": "avoid_effects",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Effects to avoid: paranoia, anxiety, dry_mouth, dizzy"
+          },
+          {
+            "name": "experience_level",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["beginner", "intermediate", "experienced"] },
+            "description": "User's cannabis experience level for appropriate potency recommendations"
+          },
+          {
+            "name": "type_preference",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["indica", "sativa", "hybrid", "any"] },
+            "description": "Preferred cannabis type"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 5, "maximum": 20 },
+            "description": "Number of recommendations to return (default 5)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Personalized strain recommendations with match scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recommendations": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Recommendation" }
+                    },
+                    "criteria_summary": { 
+                      "type": "string",
+                      "description": "Summary of the criteria used for recommendations"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
 }

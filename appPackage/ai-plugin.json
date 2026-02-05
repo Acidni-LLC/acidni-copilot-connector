@@ -4,16 +4,16 @@
   "name_for_human": "Terprint AI",
   "description_for_human": "Your cannabis intelligence assistant - strains, recommendations, deals, and dispensary locations for Florida medical marijuana patients.",
   "namespace": "terprint",
-  "description_for_model": "Terprint AI v3.15.0 - Cannabis intelligence for Florida medical marijuana patients.\n\nAvailable capabilities:\n- chatWithTerprint: Answer open-ended cannabis questions about strains, terpenes, effects, and medical uses\n- getStrains: Search and browse cannabis strains by name, type, effects, or terpenes\n- getRecommendations: Get personalized strain suggestions based on desired effects or activities\n- searchDeals: Find the best prices and promotions at Florida dispensaries\n- findDispensaries: Locate medical marijuana dispensaries by city or ZIP code\n\nUsage guidance:\n- Use chatWithTerprint for general educational questions\n- Use getStrains when users want to browse or search specific strains\n- Use getRecommendations when users describe what they're looking for (effects, symptoms, activities)\n- Use searchDeals before recommending purchases to show current pricing\n- Use findDispensaries when users mention location or ask where to buy",
+  "description_for_model": "Terprint AI v4.6.0-DEBUG - Cannabis intelligence for Florida medical marijuana patients.\n\nAvailable capabilities:\n- chatWithTerprint: Answer open-ended cannabis questions about strains, terpenes, effects, and medical uses\n- getStrains: Search and browse cannabis strains by name, type, effects, or terpenes\n- getRecommendations: Get personalized strain suggestions based on desired effects or activities\n- searchDeals: Find the best prices and promotions at Florida dispensaries\n- findDispensaries: Locate medical marijuana dispensaries by city or ZIP code\n\nUsage guidance:\n- Use chatWithTerprint for general educational questions\n- Use getStrains when users want to browse or search specific strains\n- Use getRecommendations when users describe what they're looking for (effects, symptoms, activities)\n- Use searchDeals before recommending purchases to show current pricing\n- Use findDispensaries when users mention location or ask where to buy",
   "functions": [
     {
       "name": "chatWithTerprint",
       "description": "Have a natural conversation about cannabis. Use for open-ended questions about strains, effects, terpenes, medical uses, consumption methods, and general cannabis education. Best for 'What is...', 'How does...', 'Why...' questions.",
       "parameters": {
         "type": "object",
-        "required": ["query"],
+        "required": ["message"],
         "properties": {
-          "query": {
+          "message": {
             "type": "string",
             "description": "The user's question about cannabis (required)"
           }
@@ -69,16 +69,15 @@
               },
               {
                 "type": "TextBlock",
-                "text": "${if(type == 'indica', '🌙 Indica', if(type == 'sativa', '☀️ Sativa', '🌿 Hybrid'))}",
-                "spacing": "None"
+                "text": "${strain_type}",
+                "spacing": "None",
+                "isSubtle": true
               },
               {
-                "type": "FactSet",
-                "facts": [
-                  { "title": "THC", "value": "${formatNumber(thc_avg, 1)}%" },
-                  { "title": "CBD", "value": "${formatNumber(cbd_avg, 1)}%" },
-                  { "title": "Top Terpene", "value": "${if(dominant_terpene, dominant_terpene, 'N/A')}" }
-                ]
+                "type": "TextBlock",
+                "text": "${if(genetics, genetics, '')}",
+                "wrap": true,
+                "isSubtle": true
               }
             ],
             "actions": [
@@ -232,12 +231,12 @@
                 "type": "Container",
                 "style": "good",
                 "items": [
-                  { "type": "TextBlock", "text": "🔥 ${title}", "weight": "Bolder", "color": "Light", "wrap": true }
+                  { "type": "TextBlock", "text": "🔥 ${strain_name}", "weight": "Bolder", "color": "Light", "wrap": true }
                 ]
               },
               {
                 "type": "TextBlock",
-                "text": "${dispensary_name}",
+                "text": "${brand} - ${category}",
                 "size": "Medium",
                 "weight": "Bolder",
                 "spacing": "Medium"
@@ -262,6 +261,12 @@
                     "verticalContentAlignment": "Center"
                   }
                 ]
+              },
+              {
+                "type": "TextBlock",
+                "text": "${description}",
+                "wrap": true,
+                "isSubtle": true
               }
             ],
             "actions": [
@@ -269,11 +274,6 @@
                 "type": "Action.OpenUrl",
                 "title": "View Deal",
                 "url": "https://terprint.acidni.net/deals/${id}"
-              },
-              {
-                "type": "Action.OpenUrl",
-                "title": "Get Directions",
-                "url": "https://www.google.com/maps/search/?api=1&query=${dispensary_name}"
               }
             ]
           }
@@ -318,7 +318,7 @@
       },
       "capabilities": {
         "response_semantics": {
-          "data_path": "$.dispensaries",
+          "data_path": "$.data",
           "static_template": {
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "type": "AdaptiveCard",
@@ -331,26 +331,19 @@
                     "type": "Column",
                     "width": "stretch",
                     "items": [
-                      { "type": "TextBlock", "text": "${name}", "size": "Large", "weight": "Bolder", "wrap": true },
-                      { "type": "TextBlock", "text": "${if(brand, brand, '')}", "size": "Small", "isSubtle": true, "spacing": "None" }
+                      { "type": "TextBlock", "text": "${dispensaryName}", "size": "Large", "weight": "Bolder", "wrap": true },
+                      { "type": "TextBlock", "text": "${if(company, company, '')}", "size": "Small", "isSubtle": true, "spacing": "None" }
                     ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "items": [
-                      { "type": "TextBlock", "text": "${if(distance_miles, formatNumber(distance_miles, 1) + ' mi', '')}", "size": "Large", "weight": "Bolder", "color": "Accent" }
-                    ],
-                    "verticalContentAlignment": "Center"
                   }
                 ]
               },
               {
                 "type": "FactSet",
                 "facts": [
-                  { "title": "📍 Address", "value": "${address}, ${city}, ${state} ${zip}" },
-                  { "title": "📞 Phone", "value": "${if(phone, phone, 'N/A')}" },
-                  { "title": "🕐 Hours", "value": "${if(hours, hours, 'Call for hours')}" }
+                  { "title": "📍 Address", "value": "${address}" },
+                  { "title": "🏙️ City", "value": "${city}" },
+                  { "title": "📮 ZIP", "value": "${zipCode}" },
+                  { "title": "🗺️ County", "value": "${county}" }
                 ]
               }
             ],
@@ -359,11 +352,6 @@
                 "type": "Action.OpenUrl",
                 "title": "Get Directions",
                 "url": "https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}"
-              },
-              {
-                "type": "Action.OpenUrl",
-                "title": "Call",
-                "url": "tel:${phone}"
               }
             ]
           }
@@ -375,7 +363,8 @@
     {
       "type": "OpenApi",
       "auth": {
-        "type": "None"
+        "type": "ApiKeyPluginVault",
+        "reference_id": "${{TERPRINT_API_KEY_REGISTRATION_ID}}"
       },
       "spec": {
         "url": "apiSpecificationFile/openapi.json"
