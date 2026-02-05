@@ -1,22 +1,23 @@
 /**
  * Terprint AI Bot - Entry Point
- * Handles Teams bot messaging, messaging extensions, and proactive notifications
+ * Handles Teams bot messaging, messaging extensions, and Copilot integration
  */
 
 import * as restify from "restify";
-import type { Request, Response, Next } from "restify";
 import {
   CloudAdapter,
   ConfigurationServiceClientCredentialFactory,
   ConfigurationBotFrameworkAuthentication,
   TurnContext,
 } from "botbuilder";
-import { TerprintBot } from "./teamsBot";
+import { TerprintBot } from "./bot";
+import * as dotenv from "dotenv";
 
 // Load environment variables
+dotenv.config();
+
 const botId = process.env.BOT_ID || "";
 const botPassword = process.env.BOT_PASSWORD || "";
-const apiEndpoint = process.env.API_ENDPOINT || "https://apim-terprint-dev.azure-api.net";
 
 // Create HTTP server
 const server = restify.createServer();
@@ -25,7 +26,7 @@ server.use(restify.plugins.bodyParser());
 server.listen(process.env.PORT || 3978, () => {
   console.log(`\nTerprint Bot listening on port ${process.env.PORT || 3978}`);
   console.log(`Bot ID: ${botId}`);
-  console.log(`API Endpoint: ${apiEndpoint}`);
+  console.log(`APIM Base URL: ${process.env.APIM_BASE_URL || 'https://apim-terprint-dev.azure-api.net'}`);
 });
 
 // Create adapter with authentication
@@ -61,8 +62,8 @@ adapter.onTurnError = async (context: TurnContext, error: Error) => {
   );
 };
 
-// Create the bot instance
-const bot = new TerprintBot(apiEndpoint);
+// Create the bot instance (uses TerprintApiClient internally)
+const bot = new TerprintBot();
 
 // Listen for incoming requests
 server.post("/api/messages", async (req, res) => {
