@@ -51,11 +51,11 @@ We have confirmed all API endpoints work correctly via direct HTTP calls and Pow
 
 ---
 
-## Issue 1: Tools Not Invoked - "Not Available in This Environment"
+## Issue 1: Tools Not Injected Despite Agent Loading Successfully
 
-### Symptoms
+### Root Cause Identified
 
-When using M365 Copilot Chat and invoking our declarative agent, Copilot responds with:
+After extensive testing, Copilot itself provided the explanation:
 
 > "I want to run getStrains for you — but I can't, because in this chat session the getStrains tool is not actually available."
 >
@@ -65,31 +65,61 @@ When using M365 Copilot Chat and invoking our declarative agent, Copilot respond
 >
 > Since getStrains is not defined, I can't execute it."
 
-### Expected Behavior
+**Key Finding:** The declarative agent's **instructions ARE loading** (Copilot knows about the Terprint tools and how to use them), but the **actual tool functions from ai-plugin.json are NOT being registered** with the session.
 
-Copilot should:
-1. Recognize the `getStrains` function defined in our `ai-plugin.json`
-2. Prompt the user for confirmation before calling the API
-3. Execute the API call using the registered API key
-4. Return results to the user
+### Evidence of Partial Loading
 
-### What We've Tried
+When the user invokes `@Terprint AI`, Copilot:
+- ✅ **DOES** load the custom system instructions (knows about getStrains, searchDeals, etc.)
+- ✅ **DOES** understand the tool parameters and schemas
+- ✅ **DOES** know when to use which tool
+- ❌ **DOES NOT** have access to actually call the tools
+- ❌ **DOES NOT** have the API plugin functions registered
 
-1. ✅ Multiple provision/publish cycles
-2. ✅ Cleared and re-registered API keys
-3. ✅ Switched from OpenAPI 3.0 to Swagger 2.0 (OpenAPI 3.0 broke the connector)
-4. ✅ Used exact Swagger spec exported from working Power Platform custom connector
-5. ✅ Verified all 52 validation rules pass during publish
-6. ✅ Confirmed app is published to Admin Portal
-7. ✅ Tested in Edge, Chrome, and InPrivate mode
-8. ✅ Cleared browser cache and hard-refreshed
+### The Broken Flow
 
-### Files Submitted for Review
+```
+1. User: @Terprint AI find indica strains
+2. Copilot: Loads declarativeAgent.json instructions ✅
+3. Copilot: Knows it should call getStrains(limit: 100) ✅
+4. Copilot: Attempts to call getStrains...
+5. Copilot: ERROR - Tool not in available tools list ❌
+6. System: Redirects to hydrate_tool_response (useless)
+7. Copilot: Stuck in infinite loop asking clarifying questions
+8. Finally admits: "getStrains is not defined in this session"
+```
 
-- `appPackage/manifest.json` - Teams app manifest
-- `appPackage/declarativeAgent.json` - Agent configuration
-- `appPackage/ai-plugin.json` - Plugin function definitions
-- `appPackage/apiSpecificationFile/Terprint-Cannabis-Intelligence.swagger.json` - API spec (exported from working Power Platform connector)
+### Copilot's Own Explanation
+
+When asked "why is it not available?", Copilot responded:
+
+> "getStrains isn't available here because this specific chat environment only exposes two tools to me: hydrate_tool_response and multi_tool_use.parallel"
+>
+> "Even though my 'Terprint AI' system instructions say I know how to use tools like getStrains, searchDeals, etc., those tools are not actually wired in to this particular session."
+>
+> "I can only use tools that the platform has explicitly connected, and right now that list does not include getStrains."
+
+### Where It SHOULD Work (According to Copilot)
+
+Copilot indicated these environments should have the tools available:
+- ✔️ Microsoft Power Apps using the Terprint custom connector
+- ✔️ Power Automate flows with the Terprint connector added
+- ✔️ A Copilot Studio bot with the Terprint plugin enabled
+- ✔️ Teams embedded Copilot with the plugin
+
+**However**, we published via Teams Toolkit to Teams/M365 Copilot, and the tools still don't load.
+
+### Questions for Microsoft
+
+1. **Why are the ai-plugin.json functions not being registered** even though the declarative agent instructions load correctly?
+
+2. **Is there an admin approval step** specifically for API plugin tool execution (separate from app approval)?
+
+3. **Is there a tenant-level policy** that must be enabled for API plugins to inject their tools?
+
+4. **What is the correct flow** for tools to be registered in an M365 Copilot chat session?
+
+5. **Why does the system keep redirecting to hydrate_tool_response** when there's no prior tool output?
 
 ---
 
